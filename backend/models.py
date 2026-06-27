@@ -22,6 +22,7 @@ class ChatResponse(BaseModel):
     was_optimized: bool = False
     original_tokens: int = 0
     optimized_tokens: int = 0
+    latency_ms: int = 0
 
 
 class ClassifyResponse(BaseModel):

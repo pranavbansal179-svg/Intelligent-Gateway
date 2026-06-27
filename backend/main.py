@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 from typing import Any
 
 from dotenv import load_dotenv
@@ -226,8 +227,12 @@ async def get_budget(session_id: str):
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
+    started = time.perf_counter()
     message = request.message.strip()
     session_id = request.session_id
+
+    def _elapsed_ms() -> int:
+        return max(1, round((time.perf_counter() - started) * 1000))
 
     # ------------------------------------------------------------------
     # 1. Guardrail — free regex pass (no API cost, instant)
@@ -247,6 +252,7 @@ async def chat(request: ChatRequest):
             budget_remaining=budget_manager.get_remaining(spent),
             budget_state=budget_manager.get_state(spent).value,
             injection_blocked=True,
+            latency_ms=_elapsed_ms(),
         )
 
     # ------------------------------------------------------------------
@@ -255,8 +261,10 @@ async def chat(request: ChatRequest):
     cached = semantic_cache.lookup(message)
     if cached:
         spent = _get_spent(session_id)
+        latency = _elapsed_ms()
         logger.info(
-            "CACHE HIT | session=%s | similarity match for: %.60s", session_id, message
+            "CACHE HIT | session=%s | %dms | similarity match for: %.60s",
+            session_id, latency, message,
         )
         return ChatResponse(
             answer=cached["answer"],
@@ -269,6 +277,7 @@ async def chat(request: ChatRequest):
             budget_remaining=budget_manager.get_remaining(spent),
             budget_state=budget_manager.get_state(spent).value,
             injection_blocked=False,
+            latency_ms=latency,
             cache_hit=True,
         )
 
@@ -368,9 +377,10 @@ async def chat(request: ChatRequest):
     final_state = budget_manager.get_state(post_spend)
     session_saved = _session_naive_spend.get(session_id, 0.0) - post_spend
 
+    latency = _elapsed_ms()
     logger.info(
-        "CALL COMPLETE | session=%s | model=%s | cost=$%.6f | remaining=$%.4f | state=%s | session_saved=$%.6f",
-        session_id, model, call_cost, remaining, final_state.value, session_saved,
+        "CALL COMPLETE | session=%s | model=%s | %dms | cost=$%.6f | remaining=$%.4f | state=%s | session_saved=$%.6f",
+        session_id, model, latency, call_cost, remaining, final_state.value, session_saved,
     )
 
     return ChatResponse(
@@ -387,6 +397,7 @@ async def chat(request: ChatRequest):
         was_optimized=opt["was_optimized"],
         original_tokens=opt["original_tokens"],
         optimized_tokens=opt["optimized_tokens"],
+        latency_ms=latency,
     )
 
 

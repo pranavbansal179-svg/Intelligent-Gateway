@@ -119,6 +119,7 @@ export default function ChatWindow() {
           wasOptimized: data.was_optimized ?? false,
           originalTokens: data.original_tokens ?? 0,
           optimizedTokens: data.optimized_tokens ?? 0,
+          latencyMs: data.latency_ms ?? 0,
         },
       };
 
@@ -377,12 +378,18 @@ export default function ChatWindow() {
                   ].map(({ tier, label, desc, color, icon, role }, i) => (
                     <div
                       key={tier}
-                      style={{ ...styles.tierCard, animationDelay: `${0.15 + i * 0.1}s` }}
+                      style={{
+                        ...styles.tierCard,
+                        animationDelay: `${0.15 + i * 0.1}s`,
+                        background: `linear-gradient(165deg, color-mix(in srgb, ${color} 18%, var(--glass)), var(--glass) 70%)`,
+                        borderColor: `color-mix(in srgb, ${color} 30%, transparent)`,
+                        boxShadow: `0 0 30px color-mix(in srgb, ${color} 14%, transparent)`,
+                      }}
                       className="tier-card"
                     >
                       <span style={{ ...styles.tierTopline, background: `linear-gradient(90deg, transparent, ${color}, transparent)` }} />
-                      <span style={{ ...styles.tierGlyph, color }}>{icon}</span>
-                      <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 16%, transparent)`, borderColor: `color-mix(in srgb, ${color} 35%, transparent)` }}>{tier}</span>
+                      <span style={{ ...styles.tierGlyph, color, textShadow: `0 0 12px ${color}` }}>{icon}</span>
+                      <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 20%, transparent)`, borderColor: `color-mix(in srgb, ${color} 45%, transparent)` }}>{tier}</span>
                       <span style={styles.tierName}>{label}</span>
                       <span style={styles.tierModel}>{desc}</span>
                       <span style={styles.tierRole}>{role}</span>
@@ -390,10 +397,24 @@ export default function ChatWindow() {
                   ))}
                 </div>
                 <div style={styles.featureRow}>
-                  <span style={styles.featureChip}>⚡ Semantic cache</span>
-                  <span style={styles.featureChip}>✦ Prompt optimizer</span>
-                  <span style={styles.featureChip}>🛡 Injection guard</span>
-                  <span style={styles.featureChip}>📈 Live stock data</span>
+                  {[
+                    { icon: "⚡", label: "Semantic cache", color: "var(--teal)" },
+                    { icon: "✦", label: "Prompt optimizer", color: "var(--violet)" },
+                    { icon: "🛡", label: "Injection guard", color: "var(--rose)" },
+                    { icon: "📈", label: "Live stock data", color: "var(--blue)" },
+                  ].map((f) => (
+                    <span
+                      key={f.label}
+                      style={{
+                        ...styles.featureChip,
+                        color: f.color,
+                        background: `color-mix(in srgb, ${f.color} 12%, transparent)`,
+                        borderColor: `color-mix(in srgb, ${f.color} 32%, transparent)`,
+                      }}
+                    >
+                      {f.icon} {f.label}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}

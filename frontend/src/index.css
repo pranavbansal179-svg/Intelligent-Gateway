@@ -5,17 +5,17 @@
    ============================================================ */
 :root {
   /* Surfaces */
-  --bg-0: #07080C;
+  --bg-0: #06070B;
   --bg-1: #0C0E14;
   --bg-2: #12141C;
   --bg-3: #181B26;
   --bg-4: #21252F;
 
-  /* Glass */
-  --glass: rgba(20, 23, 32, 0.6);
-  --glass-hi: rgba(28, 32, 44, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.07);
-  --glass-border-hi: rgba(255, 255, 255, 0.12);
+  /* Glass — translucent so the vivid mesh bleeds through */
+  --glass: rgba(16, 19, 28, 0.55);
+  --glass-hi: rgba(24, 28, 40, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hi: rgba(255, 255, 255, 0.16);
 
   /* Text */
   --text-hi: #F2F5FC;
@@ -51,12 +51,13 @@
   --grad-warm: linear-gradient(135deg, #FFC04D 0%, #FF6B7A 100%);
   --grad-logo: linear-gradient(120deg, #00E5AC 0%, #4DABFF 45%, #B197FC 100%);
 
-  /* Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
-  --glow-teal: 0 0 24px rgba(0, 229, 172, 0.25);
-  --glow-violet: 0 0 24px rgba(177, 151, 252, 0.25);
+  /* Shadows + glows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 22px 60px rgba(0, 0, 0, 0.55);
+  --glow-teal: 0 0 32px rgba(0, 229, 172, 0.40);
+  --glow-violet: 0 0 32px rgba(177, 151, 252, 0.40);
+  --glow-blue: 0 0 32px rgba(77, 171, 255, 0.40);
 
   /* Motion */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -79,37 +80,50 @@ html, body {
 #root { height: 100vh; position: relative; z-index: 1; }
 
 /* ============================================================
-   ANIMATED MESH BACKGROUND
+   ANIMATED MESH BACKGROUND — vivid, multi-color
    ============================================================ */
-body::before,
-body::after {
-  content: '';
-  position: fixed;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.5;
-  z-index: 0;
-  pointer-events: none;
+.bg-mesh {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
 }
-body::before {
-  width: 55vw; height: 55vw;
-  top: -18vw; left: -12vw;
-  background: radial-gradient(circle, rgba(0, 229, 172, 0.28), transparent 70%);
-  animation: drift1 22s ease-in-out infinite;
+.bg-mesh span {
+  position: absolute; border-radius: 50%; filter: blur(100px);
 }
-body::after {
-  width: 50vw; height: 50vw;
-  bottom: -16vw; right: -10vw;
-  background: radial-gradient(circle, rgba(132, 94, 247, 0.26), transparent 70%);
-  animation: drift2 26s ease-in-out infinite;
+.bg-mesh .b1 {
+  width: 46vw; height: 46vw; top: -14vw; left: -8vw;
+  background: radial-gradient(circle, rgba(0, 229, 172, 0.55), transparent 68%);
+  animation: drift1 20s ease-in-out infinite;
+}
+.bg-mesh .b2 {
+  width: 42vw; height: 42vw; bottom: -14vw; right: -6vw;
+  background: radial-gradient(circle, rgba(124, 92, 255, 0.55), transparent 68%);
+  animation: drift2 24s ease-in-out infinite;
+}
+.bg-mesh .b3 {
+  width: 34vw; height: 34vw; top: 30%; right: 18%;
+  background: radial-gradient(circle, rgba(77, 171, 255, 0.42), transparent 68%);
+  animation: drift3 28s ease-in-out infinite;
+}
+.bg-mesh .b4 {
+  width: 28vw; height: 28vw; bottom: 8%; left: 22%;
+  background: radial-gradient(circle, rgba(255, 92, 138, 0.32), transparent 68%);
+  animation: drift1 32s ease-in-out infinite reverse;
 }
 @keyframes drift1 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(8vw, 6vw) scale(1.12); }
+  50% { transform: translate(9vw, 7vw) scale(1.15); }
 }
 @keyframes drift2 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-7vw, -5vw) scale(1.1); }
+  50% { transform: translate(-8vw, -6vw) scale(1.12); }
+}
+@keyframes drift3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-6vw, 8vw) scale(1.2); }
+}
+/* faint top vignette to anchor the header */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(120% 80% at 50% -10%, rgba(0,229,172,0.10), transparent 50%);
 }
 
 /* ============================================================

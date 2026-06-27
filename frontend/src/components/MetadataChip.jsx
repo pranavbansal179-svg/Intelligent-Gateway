@@ -13,14 +13,15 @@ const TIER_COLORS = {
 /**
  * @param {{ model: string, reason: string, cost: number, cacheHit?: boolean, wasOptimized?: boolean, originalTokens?: number, optimizedTokens?: number }} props
  */
-export default function MetadataChip({ model, reason, cost, cacheHit, wasOptimized, originalTokens, optimizedTokens }) {
+export default function MetadataChip({ model, reason, cost, cacheHit, wasOptimized, originalTokens, optimizedTokens, latencyMs }) {
   if (cacheHit) {
     return (
       <div style={styles.root}>
         <div style={styles.cacheBanner}>
           <span style={styles.cacheIcon}>⚡</span>
           <span style={styles.cacheLabel}>Cache hit</span>
-          <span style={styles.cacheText}>semantic match · served instantly</span>
+          <span style={styles.cacheText}>semantic match</span>
+          {latencyMs > 0 && <span style={styles.cacheSpeed}>served in {latencyMs}ms</span>}
           <span style={styles.cacheCost}>$0.0000</span>
         </div>
       </div>
@@ -46,6 +47,7 @@ export default function MetadataChip({ model, reason, cost, cacheHit, wasOptimiz
         <span style={{ ...styles.chip, color: tierColor, background: `color-mix(in srgb, ${tierColor} 12%, transparent)` }}>{label}</span>
         <span style={styles.reason}>{reason}</span>
         <span style={styles.spacer} />
+        {latencyMs > 0 && <span style={styles.latency}>{latencyMs}ms</span>}
         <span style={styles.cost}>${(cost ?? 0).toFixed(4)}</span>
       </div>
 
@@ -87,6 +89,11 @@ const styles = {
   },
   reason: { fontSize: 11.5, color: "var(--text-lo)" },
   spacer: { flex: 1 },
+  latency: {
+    fontSize: 10.5, fontWeight: 700, color: "var(--text-lo)",
+    fontFamily: "'JetBrains Mono', monospace",
+    background: "var(--bg-3)", borderRadius: 99, padding: "2px 8px",
+  },
   cost: {
     fontSize: 11.5, fontWeight: 700, color: "var(--teal)",
     fontFamily: "'JetBrains Mono', monospace",
@@ -98,10 +105,16 @@ const styles = {
     background: "linear-gradient(90deg, color-mix(in srgb, var(--teal) 14%, transparent), transparent)",
     border: "1px solid color-mix(in srgb, var(--teal) 30%, transparent)", borderRadius: 10,
   },
-  cacheIcon: { color: "var(--teal)", fontSize: 13 },
+  cacheIcon: { color: "var(--teal)", fontSize: 13, textShadow: "0 0 10px var(--teal)" },
   cacheLabel: { color: "var(--teal)", fontSize: 11.5, fontWeight: 800, letterSpacing: "0.03em" },
   cacheText: { color: "var(--text-lo)", fontSize: 11 },
-  cacheCost: { marginLeft: "auto", color: "var(--teal)", fontSize: 11.5, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" },
+  cacheSpeed: {
+    fontSize: 10.5, fontWeight: 800, color: "var(--teal)",
+    background: "color-mix(in srgb, var(--teal) 18%, transparent)",
+    border: "1px solid color-mix(in srgb, var(--teal) 40%, transparent)",
+    borderRadius: 99, padding: "2px 9px", fontFamily: "'JetBrains Mono', monospace",
+  },
+  cacheCost: { marginLeft: "auto", color: "var(--teal)", fontSize: 11.5, fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" },
 
   /* Optimizer banner */
   optimizerBanner: {

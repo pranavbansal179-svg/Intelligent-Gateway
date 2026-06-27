@@ -106,6 +106,7 @@ export default function MessageBubble({ role, content, metadata, blocked }) {
             wasOptimized={metadata.wasOptimized}
             originalTokens={metadata.originalTokens}
             optimizedTokens={metadata.optimizedTokens}
+            latencyMs={metadata.latencyMs}
           />
         )}
       </div>
