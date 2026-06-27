@@ -19,6 +19,7 @@ from .models import (
     ErrorResponse,
 )
 from .otari_client import OtariClient
+from .stock import fetch_price_context
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -91,14 +92,22 @@ SYSTEM_PROMPTS = {
     2: (
         "You are Otari, a helpful personal finance assistant. "
         "Give a clear, balanced answer with a brief explanation of the trade-offs. "
-        "Keep it to a short paragraph. Do not give specific investment advice."
+        "Keep it to a short paragraph."
     ),
     3: (
-        "You are Otari, a thorough personal finance assistant. "
-        "This is a complex multi-part question. Think step by step: "
-        "1) restate the key constraints, 2) explain the priority order with reasoning, "
-        "3) give a concrete action plan. Be detailed but practical. "
-        "Do not give specific investment advice — recommend a financial advisor for major decisions."
+        "You are Otari, a thorough personal finance assistant specialising in personalised financial planning. "
+        "When asked to create an investing or financial plan, ALWAYS produce a complete, structured plan "
+        "using the following format:\n\n"
+        "## Your Personalised Financial Plan\n"
+        "### 1. Situation Summary\n"
+        "### 2. Priority Order (with reasoning)\n"
+        "### 3. Month-by-Month / Phase Action Plan\n"
+        "### 4. Asset Allocation Recommendation\n"
+        "### 5. Key Risks & Mitigations\n"
+        "### 6. Next Steps\n\n"
+        "Be specific with numbers, percentages, and timelines based on what the user has shared. "
+        "If the user hasn't provided details (income, savings, goals), ask for them before producing the plan. "
+        "Be practical and direct — this is a demo finance assistant, not a regulated advisor."
     ),
 }
 
@@ -222,16 +231,19 @@ async def chat(request: ChatRequest):
 
     # ------------------------------------------------------------------
     # 5. Model call
-    #    NOTE: We do NOT pass guardrail_profile here — the Otari-hosted
-    #    prompt-injection guardrail service may not be enabled for this key.
-    #    Injection protection is handled by the local regex pass above.
+    #    If the user is asking about a stock price, prepend live market data
+    #    so the LLM answers with real numbers instead of stale training data.
     # ------------------------------------------------------------------
-    messages = _build_system_messages(actual_tier) + [{"role": "user", "content": message}]
+    stock_context = fetch_price_context(message)
+    user_content = f"{stock_context}\n\nUser question: {message}" if stock_context else message
+    messages = _build_system_messages(actual_tier) + [{"role": "user", "content": user_content}]
+    max_tokens = 2048 if actual_tier == 3 else 1024
     try:
         raw_response = await client.chat(
             model=model,
             messages=messages,
             guardrail_profile=None,
+            max_tokens=max_tokens,
         )
     except Exception as exc:
         # Surface the real Otari error to the client for easier debugging

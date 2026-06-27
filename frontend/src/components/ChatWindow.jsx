@@ -220,6 +220,7 @@ export default function ChatWindow() {
                 {DEMO_PROMPTS.map((d) => (
                   <button
                     key={d.label}
+                    className="demo-btn"
                     style={styles.demoBtn}
                     onClick={() => handleSend(d.prompt)}
                     disabled={loading}
@@ -293,7 +294,21 @@ export default function ChatWindow() {
             {messages.length === 0 && (
               <div style={styles.emptyState}>
                 <div style={styles.emptyIcon}>💬</div>
-                <p style={styles.emptyText}>Ask me anything about personal finance</p>
+                <p style={styles.emptyTitle}>Otari Finance Assistant</p>
+                <p style={styles.emptyText}>Smart routing saves budget — simple questions go to fast models, complex ones to frontier models.</p>
+                <div style={styles.tierLegend}>
+                  {[
+                    { tier: "T1", label: "Simple", desc: "Qwen3-30B", color: "#00C896" },
+                    { tier: "T2", label: "Moderate", desc: "Llama-3.3-70B", color: "#F0C040" },
+                    { tier: "T3", label: "Complex", desc: "Hermes-4-70B", color: "#F0A500" },
+                  ].map(({ tier, label, desc, color }) => (
+                    <div key={tier} style={styles.tierCard}>
+                      <span style={{ ...styles.tierLabel, color, background: color + "22" }}>{tier}</span>
+                      <span style={styles.tierName}>{label}</span>
+                      <span style={styles.tierModel}>{desc}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
             {messages.map((msg) => (
@@ -307,9 +322,9 @@ export default function ChatWindow() {
             ))}
             {loading && (
               <div style={styles.typingIndicator}>
-                <span />
-                <span />
-                <span />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
               </div>
             )}
             <div ref={bottomRef} />
@@ -341,9 +356,23 @@ export default function ChatWindow() {
 
       <style>{`
         @keyframes bounce {
-          0%, 80%, 100% { transform: translateY(0); }
-          40% { transform: translateY(-6px); }
+          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+          40% { transform: translateY(-5px); opacity: 1; }
         }
+        .typing-dot {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: #00C896;
+          animation: bounce 1.2s infinite ease-in-out;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.3s; }
+        .demo-btn:hover:not(:disabled) {
+          border-color: #00C896 !important;
+          background: #00C89610 !important;
+        }
+        .demo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
       `}</style>
     </div>
   );
@@ -478,19 +507,46 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     height: "100%",
-    opacity: 0.4,
+    gap: 10,
   },
-  emptyIcon: { fontSize: 40, marginBottom: 12 },
-  emptyText: { color: "#7D8590", fontSize: 15 },
+  emptyIcon: { fontSize: 36, marginBottom: 4 },
+  emptyTitle: { color: "#E6EDF3", fontSize: 18, fontWeight: 700 },
+  emptyText: { color: "#7D8590", fontSize: 13, maxWidth: 340, textAlign: "center", lineHeight: 1.5 },
+  tierLegend: {
+    display: "flex",
+    gap: 10,
+    marginTop: 8,
+  },
+  tierCard: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 4,
+    padding: "10px 16px",
+    background: "#161B22",
+    border: "1px solid #21262D",
+    borderRadius: 10,
+    minWidth: 90,
+  },
+  tierLabel: {
+    fontSize: 11,
+    fontWeight: 800,
+    padding: "2px 8px",
+    borderRadius: 99,
+    letterSpacing: "0.05em",
+  },
+  tierName: { color: "#E6EDF3", fontSize: 12, fontWeight: 600 },
+  tierModel: { color: "#7D8590", fontSize: 10 },
   typingIndicator: {
     display: "flex",
     gap: 5,
-    padding: "12px 16px",
+    padding: "14px 18px",
     background: "#161B22",
     border: "1px solid #21262D",
     borderRadius: 14,
     width: "fit-content",
     marginBottom: 18,
+    alignItems: "center",
   },
   inputBar: {
     display: "flex",

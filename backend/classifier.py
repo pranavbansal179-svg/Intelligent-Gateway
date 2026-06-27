@@ -19,6 +19,25 @@ FINANCE_JARGON = [
     "debt-to-income",
 ]
 
+# Phrases that always force Tier 3 regardless of word count
+PLAN_TRIGGERS = [
+    "investing plan",
+    "investment plan",
+    "financial plan",
+    "retirement plan",
+    "personalised plan",
+    "personalized plan",
+    "financial roadmap",
+    "wealth plan",
+    "portfolio plan",
+    "savings plan",
+    "create a plan",
+    "build a plan",
+    "prepare a plan",
+    "make a plan",
+    "design a plan",
+]
+
 # Multi-step planning signal words
 COMPLEX_MARKERS = [
     "prioritize",
@@ -30,6 +49,10 @@ COMPLEX_MARKERS = [
     "plan",
     "allocate",
     "optimize",
+    "portfolio",
+    "retirement",
+    "diversify",
+    "wealth",
 ]
 
 # Single-trade-off signal words
@@ -67,6 +90,13 @@ class PromptClassifier:
         words = prompt.split()
         word_count = len(words)
         prompt_lower = prompt.lower()
+
+        # --- Hard Tier 3 override: explicit plan requests ---
+        if any(trigger in prompt_lower for trigger in PLAN_TRIGGERS):
+            tier = 3
+            reason = "Tier 3 — personalised financial plan request"
+            model_map = {1: MODEL_TIER1, 2: MODEL_TIER2, 3: MODEL_TIER3}
+            return {"tier": tier, "reason": reason, "model": model_map[tier]}
 
         # --- Base tier from word count ---
         if word_count < 25:

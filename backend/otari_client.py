@@ -23,6 +23,7 @@ class OtariClient:
         model: str,
         messages: list,
         guardrail_profile: str | None = None,
+        max_tokens: int = 1024,
     ) -> dict:
         """
         Send a chat completion via the official Otari SDK.
@@ -35,6 +36,7 @@ class OtariClient:
             response = await client.completion(
                 model=model,
                 messages=messages,
+                max_tokens=max_tokens,
             )
             # SDK returns a typed object — convert to dict for compatibility
             return response.model_dump()
