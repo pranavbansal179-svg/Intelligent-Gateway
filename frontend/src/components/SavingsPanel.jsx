@@ -62,11 +62,11 @@ export default function SavingsPanel({ actualTotal = 0, naiveTotal = 0, queryCou
 
 const styles = {
   wrapper: {
-    background: "var(--bg-1)", border: "1px solid var(--border-soft)",
+    background: "rgba(26, 20, 40, 0.5)", border: "1px solid rgba(107, 163, 255, 0.12)",
     borderRadius: 13, overflow: "hidden", marginTop: 3,
   },
   header: {
-    padding: "12px 14px 10px", borderBottom: "1px solid var(--border-soft)",
+    padding: "12px 14px 10px", borderBottom: "1px solid rgba(107, 163, 255, 0.1)",
     display: "flex", justifyContent: "space-between", alignItems: "center",
   },
   title: { fontSize: 12, fontWeight: 700, color: "var(--text-mid)" },
@@ -78,19 +78,19 @@ const styles = {
   vs: { fontSize: 10, color: "var(--text-dim)", fontWeight: 700, padding: "0 8px", textTransform: "uppercase" },
   savingsRow: {
     display: "flex", justifyContent: "space-between", alignItems: "center",
-    padding: "8px 14px", margin: "4px 10px 0", borderRadius: 8, background: "var(--bg-2)",
+    padding: "8px 14px", margin: "4px 10px 0", borderRadius: 8, background: "rgba(107, 163, 255, 0.08)",
   },
   savingsLabel: { fontSize: 10.5, color: "var(--text-lo)", fontWeight: 500 },
   savingsAmount: { fontSize: 13, fontWeight: 700, color: "var(--teal)", fontFamily: "'JetBrains Mono', monospace" },
-  savingsPct: { fontSize: 10.5, color: "color-mix(in srgb, var(--teal) 65%, transparent)" },
+  savingsPct: { fontSize: 10.5, color: "color-mix(in srgb, var(--teal) 70%, transparent)" },
   projectionBox: {
     position: "relative", margin: "11px", padding: "16px 13px", textAlign: "center",
     borderRadius: 11, overflow: "hidden",
-    background: "linear-gradient(135deg, color-mix(in srgb, var(--teal) 9%, transparent), color-mix(in srgb, var(--violet) 7%, transparent))",
-    border: "1px solid color-mix(in srgb, var(--teal) 24%, transparent)",
+    background: "linear-gradient(135deg, rgba(107, 163, 255, 0.1), rgba(179, 102, 255, 0.06))",
+    border: "1px solid rgba(107, 163, 255, 0.15)",
   },
   projGlow: {
-    position: "absolute", inset: 0, background: "radial-gradient(circle at 50% 0%, rgba(8,120,87,0.08), transparent 70%)",
+    position: "absolute", inset: 0, background: "radial-gradient(circle at 50% 0%, rgba(107, 163, 255, 0.08), transparent 70%)",
     pointerEvents: "none",
   },
   projectionLabel: { fontSize: 9, color: "var(--text-lo)", marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, position: "relative" },

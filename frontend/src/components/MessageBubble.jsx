@@ -61,7 +61,7 @@ function inline(text) {
     if (/^\*\*[^*]+\*\*$/.test(p)) return <strong key={i} style={{ color: "var(--text-hi)", fontWeight: 700 }}>{p.slice(2, -2)}</strong>;
     if (/^`[^`]+`$/.test(p)) return <code key={i} style={{
       fontFamily: "'JetBrains Mono', monospace", fontSize: "0.86em",
-      background: "color-mix(in srgb, var(--blue) 8%, transparent)", padding: "2px 7px", borderRadius: 4, color: "var(--blue)", fontWeight: 500,
+      background: "rgba(107, 163, 255, 0.15)", padding: "2px 7px", borderRadius: 4, color: "var(--teal)", fontWeight: 500,
     }}>{p.slice(1, -1)}</code>;
     return p;
   });
@@ -118,8 +118,8 @@ const styles = {
   wrapper: { display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 24 },
   avatar: {
     width: 36, height: 36, borderRadius: 10, flexShrink: 0, marginTop: 2,
-    background: "linear-gradient(135deg, rgba(72, 112, 197, 0.08), rgba(8, 120, 87, 0.08))",
-    border: "1px solid rgba(72, 112, 197, 0.12)", display: "flex", alignItems: "center",
+    background: "linear-gradient(135deg, rgba(107, 163, 255, 0.12), rgba(179, 102, 255, 0.08))",
+    border: "1px solid rgba(107, 163, 255, 0.15)", display: "flex", alignItems: "center",
     justifyContent: "center",
   },
   avatarText: { color: "var(--blue)", fontWeight: 700, fontSize: 13 },
@@ -129,15 +129,15 @@ const styles = {
   },
   userBubble: {
     background: "var(--grad-primary)", color: "var(--on-primary)", borderBottomRightRadius: 4,
-    fontWeight: 500, boxShadow: "0 2px 8px rgba(72, 112, 197, 0.16)",
+    fontWeight: 500, boxShadow: "0 0 16px rgba(107, 163, 255, 0.25)",
   },
   assistantBubble: {
-    background: "var(--bg-1)", border: "1px solid var(--border)",
-    borderBottomLeftRadius: 4, boxShadow: "var(--shadow-sm)",
+    background: "rgba(26, 20, 40, 0.6)", border: "1px solid rgba(107, 163, 255, 0.12)",
+    borderBottomLeftRadius: 4, boxShadow: "0 2px 12px rgba(0, 0, 0, 0.3)",
     color: "var(--text-hi)",
   },
   blockedBubble: {
-    background: "color-mix(in srgb, var(--rose) 12%, var(--glass))",
+    background: "color-mix(in srgb, var(--rose) 12%, rgba(26, 20, 40, 0.8))",
     border: "1px solid color-mix(in srgb, var(--rose) 35%, transparent)",
   },
   blockedHeader: {
