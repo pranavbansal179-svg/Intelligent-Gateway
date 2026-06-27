@@ -53,7 +53,7 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
           <span style={{ color, fontVariantNumeric: "tabular-nums" }}>
             {spent.toFixed(6)}
           </span>
-          <span style={styles.muted}> spent · ${remaining.toFixed(4)} left / ${cap.toFixed(2)}</span>
+          <span style={styles.muted}> spent · ${remaining.toFixed(6)} left / ${cap.toFixed(2)}</span>
         </span>
       </div>
 
