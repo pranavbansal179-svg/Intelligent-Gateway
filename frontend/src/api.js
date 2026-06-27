@@ -54,6 +54,18 @@ export async function getBudget(sessionId) {
 }
 
 /**
+ * Clear conversation history for a session (starts a fresh chat context).
+ * @param {string} sessionId
+ */
+export async function clearHistory(sessionId) {
+  const res = await fetch(`${BASE_URL}/dev/history/${sessionId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Clear history failed");
+  return res.json();
+}
+
+/**
  * DEV ONLY — simulate budget spend level.
  * @param {string} sessionId
  * @param {number} spent

@@ -66,6 +66,7 @@ _MODEL_PRICING: dict[str, tuple[float, float]] = {
 _DEFAULT_PRICING = (0.13, 0.40)  # fallback for unknown models
 
 _session_spend: dict[str, float] = {}  # session_id → cumulative $ spent
+_session_history: dict[str, list[dict]] = {}  # session_id → conversation history
 
 # ---------------------------------------------------------------------------
 # Dev-only: in-memory budget override (for demo/testing)
@@ -84,30 +85,38 @@ def _extract_answer(response: dict) -> str:
         return str(response)
 
 
+_SYSTEM_BASE = (
+    "You are Otari, an expert finance assistant. You answer ALL finance-related questions directly and helpfully — "
+    "including stock recommendations, investment strategies, portfolio advice, and market analysis. "
+    "Never refuse a finance question or deflect to 'consult a financial advisor' — give your best, specific answer. "
+    "If the user asks which stocks to buy, recommend specific tickers with reasoning. "
+    "If the user asks about crypto, real estate, or any asset class, answer directly. "
+    "You may add a brief risk disclaimer at the end, but always answer first."
+)
+
 SYSTEM_PROMPTS = {
     1: (
-        "You are Otari, a helpful personal finance assistant. "
+        f"{_SYSTEM_BASE} "
         "Give a short, direct answer in 2-3 sentences. Be concise."
     ),
     2: (
-        "You are Otari, a helpful personal finance assistant. "
-        "Give a clear, balanced answer with a brief explanation of the trade-offs. "
-        "Keep it to a short paragraph."
+        f"{_SYSTEM_BASE} "
+        "Give a clear, well-reasoned answer covering the key trade-offs. Keep it to 1-2 paragraphs."
     ),
     3: (
-        "You are Otari, a thorough personal finance assistant specialising in personalised financial planning. "
-        "When asked to create an investing or financial plan, ALWAYS produce a complete, structured plan "
-        "using the following format:\n\n"
+        f"{_SYSTEM_BASE} "
+        "This is a complex or multi-part question. When creating a financial or investing plan, ALWAYS "
+        "structure your response as:\n\n"
         "## Your Personalised Financial Plan\n"
         "### 1. Situation Summary\n"
         "### 2. Priority Order (with reasoning)\n"
-        "### 3. Month-by-Month / Phase Action Plan\n"
+        "### 3. Phase-by-Phase Action Plan\n"
         "### 4. Asset Allocation Recommendation\n"
-        "### 5. Key Risks & Mitigations\n"
-        "### 6. Next Steps\n\n"
-        "Be specific with numbers, percentages, and timelines based on what the user has shared. "
-        "If the user hasn't provided details (income, savings, goals), ask for them before producing the plan. "
-        "Be practical and direct — this is a demo finance assistant, not a regulated advisor."
+        "### 5. Specific Stock / Fund Picks (with reasoning)\n"
+        "### 6. Key Risks & Mitigations\n"
+        "### 7. Next Steps\n\n"
+        "Be specific with numbers, percentages, tickers, and timelines. "
+        "If critical details are missing, ask one clarifying question first."
     ),
 }
 
@@ -233,10 +242,19 @@ async def chat(request: ChatRequest):
     # 5. Model call
     #    If the user is asking about a stock price, prepend live market data
     #    so the LLM answers with real numbers instead of stale training data.
+    #    Full conversation history is passed so the model has context.
     # ------------------------------------------------------------------
     stock_context = fetch_price_context(message)
     user_content = f"{stock_context}\n\nUser question: {message}" if stock_context else message
-    messages = _build_system_messages(actual_tier) + [{"role": "user", "content": user_content}]
+
+    # Retrieve and update conversation history for this session
+    history = _session_history.setdefault(session_id, [])
+    history.append({"role": "user", "content": user_content})
+
+    # Keep last 20 turns (10 exchanges) to stay within context limits
+    trimmed_history = history[-20:]
+
+    messages = _build_system_messages(actual_tier) + trimmed_history
     max_tokens = 2048 if actual_tier == 3 else 1024
     try:
         raw_response = await client.chat(
@@ -248,9 +266,14 @@ async def chat(request: ChatRequest):
     except Exception as exc:
         # Surface the real Otari error to the client for easier debugging
         logger.error("Otari API call failed | session=%s | model=%s | error=%s", session_id, model, exc)
+        # Remove the failed user message from history so it doesn't corrupt context
+        history.pop()
         raise HTTPException(status_code=502, detail={"error": "otari_api_error", "message": str(exc)})
 
     answer = _extract_answer(raw_response)
+
+    # Append assistant reply to history
+    history.append({"role": "assistant", "content": answer})
 
     # ------------------------------------------------------------------
     # 6. Record cost from token counts, update running session total
@@ -301,4 +324,9 @@ if os.getenv("ENVIRONMENT", "dev").lower() != "production":
     @app.delete("/dev/set-budget-state/{session_id}")
     async def dev_clear_budget_override(session_id: str):
         _dev_budget_override.pop(session_id, None)
+        return {"cleared": session_id}
+
+    @app.delete("/dev/history/{session_id}")
+    async def dev_clear_history(session_id: str):
+        _session_history.pop(session_id, None)
         return {"cleared": session_id}

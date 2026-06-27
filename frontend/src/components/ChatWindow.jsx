@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { devSetBudgetState, getBudget, sendChat } from "../api";
+import { clearHistory, devSetBudgetState, getBudget, sendChat } from "../api";
 import BudgetBar from "./BudgetBar";
 import MessageBubble from "./MessageBubble";
 
@@ -168,6 +168,18 @@ export default function ChatWindow() {
           <span style={styles.subtitle}> Finance Assistant</span>
         </div>
         <div style={styles.headerRight}>
+          <button
+            style={styles.ghostBtn}
+            onClick={async () => {
+              await clearHistory(SESSION_ID).catch(() => {});
+              setMessages([]);
+              setRequestLog([]);
+              setBudget({ spent: 0, state: "FULL" });
+              showToast("New chat started", "info");
+            }}
+          >
+            + New chat
+          </button>
           <button style={styles.ghostBtn} onClick={() => setLogOpen((o) => !o)}>
             {logOpen ? "Hide" : "Show"} log
           </button>
