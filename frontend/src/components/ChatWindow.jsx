@@ -357,7 +357,7 @@ export default function ChatWindow() {
         </aside>
 
         {/* ── Chat area ── */}
-        <main style={styles.chatArea} className="dot-grid">
+        <main style={styles.chatArea}>
           <div style={styles.messageList}>
             {activeChat.messages.length === 0 && (
               <div style={styles.emptyState}>
@@ -381,15 +381,11 @@ export default function ChatWindow() {
                       style={{
                         ...styles.tierCard,
                         animationDelay: `${0.15 + i * 0.1}s`,
-                        background: `linear-gradient(165deg, color-mix(in srgb, ${color} 18%, var(--glass)), var(--glass) 70%)`,
-                        borderColor: `color-mix(in srgb, ${color} 30%, transparent)`,
-                        boxShadow: `0 0 30px color-mix(in srgb, ${color} 14%, transparent)`,
+                        borderLeft: `3px solid ${color}`,
                       }}
                       className="tier-card"
                     >
-                      <span style={{ ...styles.tierTopline, background: `linear-gradient(90deg, transparent, ${color}, transparent)` }} />
-                      <span style={{ ...styles.tierGlyph, color, textShadow: `0 0 12px ${color}` }}>{icon}</span>
-                      <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 20%, transparent)`, borderColor: `color-mix(in srgb, ${color} 45%, transparent)` }}>{tier}</span>
+                      <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 14%, transparent)`, borderColor: `color-mix(in srgb, ${color} 30%, transparent)` }}>{tier}</span>
                       <span style={styles.tierName}>{label}</span>
                       <span style={styles.tierModel}>{desc}</span>
                       <span style={styles.tierRole}>{role}</span>
@@ -499,14 +495,14 @@ const styles = {
   brand: { display: "flex", alignItems: "center", gap: 12 },
   logoWrap: { position: "relative", width: 40, height: 40, flexShrink: 0 },
   logoRing: {
-    position: "absolute", inset: -2, borderRadius: 13,
-    background: "conic-gradient(from 0deg, #00E5AC, #4DABFF, #B197FC, #00E5AC)",
-    filter: "blur(3px)", opacity: 0.75, animation: "spinSlow 5s linear infinite",
+    position: "absolute", inset: -1, borderRadius: 13,
+    background: "conic-gradient(from 0deg, #3D6BFF, #6C4DF6, #00A982, #3D6BFF)",
+    filter: "blur(2px)", opacity: 0.45, animation: "spinSlow 8s linear infinite",
   },
   logoMark: {
     position: "relative", width: 40, height: 40, borderRadius: 12,
-    background: "linear-gradient(135deg, rgba(10,14,20,0.95), rgba(18,22,32,0.95))",
-    border: "1px solid var(--glass-border-hi)",
+    background: "linear-gradient(135deg, #EEF3FF, #DDEAFF)",
+    border: "1px solid rgba(45, 91, 255, 0.18)",
     display: "flex", alignItems: "center", justifyContent: "center",
   },
   brandName: { display: "flex", alignItems: "baseline", gap: 8 },
@@ -552,8 +548,8 @@ const styles = {
     position: "relative", overflow: "hidden",
     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
     width: "100%", padding: "12px", marginBottom: 6, borderRadius: 12, border: "none",
-    background: "var(--grad-primary)", color: "#04110C", fontWeight: 800, fontSize: 13.5,
-    cursor: "pointer", boxShadow: "var(--glow-teal)", transition: "all 0.22s var(--ease)",
+    background: "var(--grad-primary)", color: "var(--on-primary)", fontWeight: 700, fontSize: 13.5,
+    cursor: "pointer", boxShadow: "0 4px 14px rgba(45, 91, 255, 0.30)", transition: "all 0.22s var(--ease)",
     flexShrink: 0,
   },
   newChatPlus: { fontSize: 17, fontWeight: 700, lineHeight: 1 },
@@ -626,7 +622,7 @@ const styles = {
 
   /* Chat area */
   chatArea: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" },
-  messageList: { flex: 1, overflowY: "auto", padding: "28px 8% 16px" },
+  messageList: { flex: 1, overflowY: "auto", padding: "32px 10% 16px" },
 
   /* Empty state */
   emptyState: {
@@ -634,32 +630,28 @@ const styles = {
     justifyContent: "center", minHeight: "100%", textAlign: "center", padding: "20px",
     animation: "fadeUp 0.5s var(--ease)",
   },
-  emptyGlow: {
-    position: "absolute", top: "18%", width: 360, height: 360, borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(0,229,172,0.14), transparent 65%)",
-    filter: "blur(40px)", pointerEvents: "none",
-  },
+  emptyGlow: { display: "none" },
   emptyBadge: {
-    fontSize: 12, fontWeight: 700, color: "var(--teal)", padding: "6px 14px",
-    borderRadius: 99, border: "1px solid color-mix(in srgb, var(--teal) 30%, transparent)",
-    background: "color-mix(in srgb, var(--teal) 10%, transparent)", marginBottom: 22,
+    fontSize: 11.5, fontWeight: 600, color: "var(--blue)", padding: "5px 14px",
+    borderRadius: 99, border: "1px solid color-mix(in srgb, var(--blue) 25%, transparent)",
+    background: "color-mix(in srgb, var(--blue) 8%, transparent)", marginBottom: 20,
+    letterSpacing: "0.01em",
   },
-  emptyTitle: { fontSize: 38, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 14 },
-  emptyText: { color: "var(--text-mid)", fontSize: 15, maxWidth: 480, lineHeight: 1.6, marginBottom: 30 },
-  tierLegend: { display: "flex", gap: 14, marginBottom: 26, flexWrap: "wrap", justifyContent: "center" },
+  emptyTitle: { fontSize: 34, fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.15, marginBottom: 12, color: "var(--text-hi)" },
+  emptyText: { color: "var(--text-mid)", fontSize: 15, maxWidth: 460, lineHeight: 1.7, marginBottom: 32 },
+  tierLegend: { display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap", justifyContent: "center" },
   tierCard: {
-    position: "relative", overflow: "hidden",
-    display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-    padding: "20px 22px 18px", background: "var(--glass)", backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)", border: "1px solid var(--glass-border)",
-    borderRadius: 18, minWidth: 150, transition: "transform 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease)",
+    position: "relative",
+    display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 5,
+    padding: "18px 20px", background: "var(--bg-1)",
+    border: "1px solid var(--border)", borderRadius: 16, minWidth: 158,
+    transition: "transform 0.22s var(--ease), box-shadow 0.22s var(--ease)",
+    boxShadow: "var(--shadow-sm)",
   },
-  tierTopline: { position: "absolute", top: 0, left: 0, right: 0, height: 2 },
-  tierGlyph: { fontSize: 13, letterSpacing: 2 },
-  tierLabel: { fontSize: 11, fontWeight: 800, padding: "3px 11px", borderRadius: 99, letterSpacing: "0.05em", border: "1px solid" },
-  tierName: { color: "var(--text-hi)", fontSize: 15, fontWeight: 800, marginTop: 2 },
+  tierLabel: { fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, letterSpacing: "0.04em", border: "1px solid", marginBottom: 4 },
+  tierName: { color: "var(--text-hi)", fontSize: 15, fontWeight: 700 },
   tierModel: { color: "var(--text-lo)", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" },
-  tierRole: { color: "var(--text-dim)", fontSize: 10.5, marginTop: 4, maxWidth: 130, lineHeight: 1.3 },
+  tierRole: { color: "var(--text-mid)", fontSize: 11.5, marginTop: 4, maxWidth: 140, lineHeight: 1.45 },
   featureRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", maxWidth: 460 },
   featureChip: {
     fontSize: 12, fontWeight: 600, color: "var(--text-mid)", padding: "7px 14px",
@@ -684,9 +676,8 @@ const styles = {
   inputZone: { padding: "12px 8% 16px", background: "linear-gradient(transparent, var(--bg-0) 40%)" },
   inputBar: {
     display: "flex", gap: 10, padding: "8px 8px 8px 18px", borderRadius: 16,
-    background: "var(--glass-hi)", border: "1px solid var(--glass-border-hi)",
-    backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-    transition: "all 0.25s var(--ease)", boxShadow: "var(--shadow-md)",
+    background: "var(--bg-1)", border: "1px solid var(--border)",
+    transition: "all 0.25s var(--ease)", boxShadow: "var(--shadow-sm)",
   },
   inputBarDisabled: { opacity: 0.6 },
   input: {
@@ -695,9 +686,9 @@ const styles = {
   },
   sendBtn: {
     display: "flex", alignItems: "center", justifyContent: "center",
-    background: "var(--grad-primary)", color: "#04110C", border: "none", borderRadius: 11,
-    padding: "11px 22px", fontWeight: 800, fontSize: 14, cursor: "pointer",
-    transition: "all 0.2s var(--ease)", boxShadow: "var(--glow-teal)", minWidth: 92,
+    background: "var(--grad-primary)", color: "var(--on-primary)", border: "none", borderRadius: 11,
+    padding: "11px 22px", fontWeight: 700, fontSize: 14, cursor: "pointer",
+    transition: "all 0.2s var(--ease)", boxShadow: "0 4px 14px rgba(45, 91, 255, 0.28)", minWidth: 92,
   },
   inputHint: { textAlign: "center", fontSize: 11, color: "var(--text-dim)", marginTop: 9 },
 
@@ -706,26 +697,26 @@ const styles = {
     /* Sidebar children must keep natural height so the sidebar scrolls */
     .sidebar > * { flex-shrink: 0; }
 
-    .hover-lift:hover { transform: translateY(-1px); border-color: var(--glass-border-hi); color: var(--text-hi); }
-    .newchat-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,229,172,0.35); filter: brightness(1.05); }
+    .hover-lift:hover { transform: translateY(-1px); border-color: var(--border); color: var(--text-hi); }
+    .newchat-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,91,255,0.38); filter: brightness(1.06); }
     .newchat-btn:active { transform: translateY(0); }
     .chat-item:hover { background: var(--bg-3); }
     .chat-item:hover .delete-chat-btn { opacity: 1; }
     .delete-chat-btn { opacity: 0; transition: opacity 0.15s, background 0.15s, color 0.15s; }
-    .delete-chat-btn:hover { background: color-mix(in srgb, var(--rose) 18%, transparent); color: var(--rose); }
-    .demo-btn:hover:not(:disabled) { border-color: var(--glass-border-hi); background: var(--bg-3); transform: translateX(2px); }
+    .delete-chat-btn:hover { background: color-mix(in srgb, var(--rose) 14%, transparent); color: var(--rose); }
+    .demo-btn:hover:not(:disabled) { border-color: var(--border); background: var(--bg-3); transform: translateX(2px); }
     .demo-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .dev-btn:hover { border-color: var(--glass-border-hi); color: var(--text-hi); background: var(--bg-4); }
-    .tier-card { animation: popIn 0.55s var(--ease-spring) backwards; }
-    .tier-card:hover { transform: translateY(-6px) scale(1.02); border-color: var(--glass-border-hi); box-shadow: var(--shadow-lg), var(--glow-teal); }
-    .input-bar:focus-within { border-color: color-mix(in srgb, var(--teal) 50%, transparent); box-shadow: 0 0 0 3px rgba(0,229,172,0.1), var(--shadow-md); }
-    .send-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 6px 20px rgba(0,229,172,0.4); }
+    .dev-btn:hover { border-color: var(--border); color: var(--text-hi); background: var(--bg-4); }
+    .tier-card { animation: popIn 0.45s var(--ease-spring) backwards; }
+    .tier-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .input-bar:focus-within { border-color: color-mix(in srgb, var(--blue) 50%, transparent); box-shadow: 0 0 0 3px rgba(45,91,255,0.10), var(--shadow-md); }
+    .send-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 6px 18px rgba(45,91,255,0.38); }
     .send-btn:active:not(:disabled) { transform: translateY(0); }
     .toast-in { animation: popIn 0.3s var(--ease-spring); }
 
     .typing-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--grad-primary);
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--blue);
       animation: typing 1.3s infinite ease-in-out;
     }
     .typing-dot:nth-child(2) { animation-delay: 0.16s; }
@@ -733,7 +724,7 @@ const styles = {
 
     .spinner {
       width: 15px; height: 15px; border-radius: 50%;
-      border: 2px solid rgba(4,17,12,0.3); border-top-color: #04110C;
+      border: 2px solid rgba(255,255,255,0.35); border-top-color: #ffffff;
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }

@@ -118,23 +118,23 @@ const styles = {
   wrapper: { display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 22 },
   avatar: {
     width: 34, height: 34, borderRadius: 12, flexShrink: 0, marginTop: 2,
-    background: "linear-gradient(135deg, rgba(0,229,172,0.22), rgba(132,94,247,0.22))",
-    border: "1px solid var(--glass-border-hi)", display: "flex", alignItems: "center",
-    justifyContent: "center", boxShadow: "0 0 14px rgba(0,229,172,0.15)",
+    background: "linear-gradient(135deg, #EEF3FF, #DDEAFF)",
+    border: "1px solid rgba(45, 91, 255, 0.16)", display: "flex", alignItems: "center",
+    justifyContent: "center",
   },
-  avatarText: { color: "var(--teal)", fontWeight: 900, fontSize: 14 },
+  avatarText: { color: "var(--blue)", fontWeight: 800, fontSize: 14 },
   bubble: {
-    padding: "14px 18px", borderRadius: 18, lineHeight: 1.65, fontSize: 14.5,
+    padding: "14px 18px", borderRadius: 18, lineHeight: 1.7, fontSize: 14.5,
     color: "var(--text-hi)", wordBreak: "break-word",
   },
   userBubble: {
-    background: "var(--grad-primary)", color: "#04110C", borderBottomRightRadius: 5,
-    fontWeight: 500, boxShadow: "0 4px 16px rgba(0,229,172,0.22)",
+    background: "var(--grad-primary)", color: "var(--on-primary)", borderBottomRightRadius: 5,
+    fontWeight: 500, boxShadow: "0 4px 14px rgba(45, 91, 255, 0.28)",
   },
   assistantBubble: {
-    background: "var(--glass-hi)", border: "1px solid var(--glass-border)",
-    borderBottomLeftRadius: 5, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-    color: "var(--text-mid)",
+    background: "var(--bg-1)", border: "1px solid var(--border)",
+    borderBottomLeftRadius: 5, boxShadow: "var(--shadow-sm)",
+    color: "var(--text-hi)",
   },
   blockedBubble: {
     background: "color-mix(in srgb, var(--rose) 12%, var(--glass))",
