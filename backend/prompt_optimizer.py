@@ -48,14 +48,19 @@ async def optimize_prompt(message: str, tier: int, client) -> dict:
             model=MODEL_TIER1,
             messages=[
                 {"role": "system", "content": _OPTIMIZER_SYSTEM},
-                {"role": "user", "content": message},
+                # /no_think disables Qwen3 chain-of-thought so we get a direct rewrite
+                {"role": "user", "content": f"{message} /no_think"},
             ],
             max_tokens=256,
         )
-        compressed = response["choices"][0]["message"]["content"].strip()
+        raw = response["choices"][0]["message"]["content"]
+
+        # Strip <think>...</think> blocks that Qwen3 may still emit
+        import re
+        compressed = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
 
         # Safety: if the model returned something clearly wrong, fall back
-        if not compressed or len(compressed) > len(message) * 1.2:
+        if not compressed or len(compressed) > len(message) * 1.5:
             raise ValueError("Optimizer returned longer text — skipping")
 
         optimized_tokens = _estimate_tokens(compressed)
