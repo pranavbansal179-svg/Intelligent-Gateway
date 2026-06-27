@@ -19,6 +19,7 @@ from .models import (
     ErrorResponse,
 )
 from .otari_client import OtariClient
+from .prompt_optimizer import optimize_prompt
 from .semantic_cache import SemanticCache
 from .stock import fetch_price_context
 
@@ -278,13 +279,20 @@ async def chat(request: ChatRequest):
         logger.info("BUDGET DOWNGRADE | session=%s | %s", session_id, downgrade_reason)
 
     # ------------------------------------------------------------------
-    # 5. Model call
+    # 5. Prompt optimization — use Tier 1 to compress verbose Tier 2/3 prompts
+    #    before sending to the (more expensive) target model.
+    # ------------------------------------------------------------------
+    opt = await optimize_prompt(message, actual_tier, client)
+    effective_message = opt["optimized"]
+
+    # ------------------------------------------------------------------
+    # 6. Model call
     #    If the user is asking about a stock price, prepend live market data
     #    so the LLM answers with real numbers instead of stale training data.
     #    Full conversation history is passed so the model has context.
     # ------------------------------------------------------------------
-    stock_context = fetch_price_context(message)
-    user_content = f"{stock_context}\n\nUser question: {message}" if stock_context else message
+    stock_context = fetch_price_context(effective_message)
+    user_content = f"{stock_context}\n\nUser question: {effective_message}" if stock_context else effective_message
 
     # Retrieve and update conversation history for this session
     history = _session_history.setdefault(session_id, [])
@@ -347,6 +355,9 @@ async def chat(request: ChatRequest):
         budget_remaining=remaining,
         budget_state=final_state.value,
         injection_blocked=False,
+        was_optimized=opt["was_optimized"],
+        original_tokens=opt["original_tokens"],
+        optimized_tokens=opt["optimized_tokens"],
     )
 
 

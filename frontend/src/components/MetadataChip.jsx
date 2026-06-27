@@ -11,9 +11,9 @@ const TIER_COLORS = {
 };
 
 /**
- * @param {{ model: string, reason: string, cost: number, cacheHit?: boolean }} props
+ * @param {{ model: string, reason: string, cost: number, cacheHit?: boolean, wasOptimized?: boolean, originalTokens?: number, optimizedTokens?: number }} props
  */
-export default function MetadataChip({ model, reason, cost, cacheHit }) {
+export default function MetadataChip({ model, reason, cost, cacheHit, wasOptimized, originalTokens, optimizedTokens }) {
   if (cacheHit) {
     return (
       <div style={styles.row}>
@@ -33,6 +33,9 @@ export default function MetadataChip({ model, reason, cost, cacheHit }) {
   const label = MODEL_LABELS[model] ?? model.replace(/^mzai:/, "").split("/").pop();
   const tier = reason.match(/Tier (\d)/i)?.[1];
   const tierColor = TIER_COLORS[tier] ?? "#00C896";
+  const savedPct = wasOptimized && originalTokens > 0
+    ? Math.round((1 - optimizedTokens / originalTokens) * 100)
+    : 0;
 
   return (
     <div style={styles.row}>
@@ -48,6 +51,14 @@ export default function MetadataChip({ model, reason, cost, cacheHit }) {
       <span style={{ ...styles.text, fontVariantNumeric: "tabular-nums", color: "#00C896" }}>
         ${(cost ?? 0).toFixed(4)}
       </span>
+      {wasOptimized && savedPct > 0 && (
+        <>
+          <span style={styles.dot}>·</span>
+          <span style={{ ...styles.tierBadge, color: "#A78BFA", background: "#A78BFA22", borderColor: "#A78BFA44" }}>
+            ✦ {originalTokens}→{optimizedTokens} tok (−{savedPct}%)
+          </span>
+        </>
+      )}
     </div>
   );
 }

@@ -121,6 +121,9 @@ export default function ChatWindow() {
           reason: data.routing_reason,
           cost: data.call_cost,
           cacheHit: data.cache_hit ?? false,
+          wasOptimized: data.was_optimized ?? false,
+          originalTokens: data.original_tokens ?? 0,
+          optimizedTokens: data.optimized_tokens ?? 0,
         },
       };
 

@@ -19,6 +19,9 @@ class ChatResponse(BaseModel):
     budget_state: str
     injection_blocked: bool = False
     cache_hit: bool = False
+    was_optimized: bool = False
+    original_tokens: int = 0
+    optimized_tokens: int = 0
 
 
 class ClassifyResponse(BaseModel):
