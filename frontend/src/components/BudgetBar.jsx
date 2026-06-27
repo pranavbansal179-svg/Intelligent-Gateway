@@ -106,8 +106,8 @@ const styles = {
   sep: { color: "var(--text-dim)" },
   cap: { color: "var(--text-mid)", fontWeight: 600 },
   track: {
-    height: 6, background: "rgba(107, 163, 255, 0.1)", borderRadius: 99, overflow: "hidden",
-    border: "1px solid rgba(107, 163, 255, 0.15)",
+    height: 6, background: "rgba(10, 125, 217, 0.08)", borderRadius: 99, overflow: "hidden",
+    border: "1px solid rgba(10, 125, 217, 0.12)",
   },
   fill: { height: "100%", borderRadius: 99, transition: "width 0.6s var(--ease)" },
 };

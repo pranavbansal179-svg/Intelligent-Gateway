@@ -1,69 +1,69 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Crimson+Text:wght@400;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* ============================================================
-   DESIGN TOKENS — Modern dark gradient aesthetic (Arcade + Oxaley inspired)
+   DESIGN TOKENS — Ultra-minimalist luxury gradient aesthetic
    ============================================================ */
 :root {
-  /* Surfaces — Dark, modern */
-  --bg-0: #0f0a1a;       /* page — deep navy/purple */
-  --bg-1: #1a1428;       /* cards/panels — slightly lighter */
-  --bg-2: #14101f;       /* subtle variations */
-  --bg-3: #2d2340;       /* hover — with purple tint */
-  --bg-4: #3d3450;       /* pressed */
+  /* Surfaces — Light, modern, minimalist */
+  --bg-0: #f8f9fc;       /* page — nearly white with blue tint */
+  --bg-1: #ffffff;       /* cards/panels — pure white */
+  --bg-2: #f5f6fa;       /* subtle variations */
+  --bg-3: #eff1f8;       /* hover — light blue-gray */
+  --bg-4: #e8ecf5;       /* pressed */
 
-  /* Glass — Frosted dark glass effect */
-  --glass: rgba(26, 20, 40, 0.65);
-  --glass-hi: rgba(26, 20, 40, 0.85);
-  --glass-border: rgba(147, 112, 219, 0.15);
-  --glass-border-hi: rgba(147, 112, 219, 0.25);
+  /* Glass — Subtle frosted effect on light */
+  --glass: rgba(255, 255, 255, 0.8);
+  --glass-hi: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(59, 89, 152, 0.08);
+  --glass-border-hi: rgba(59, 89, 152, 0.15);
 
-  /* Text — High contrast on dark */
-  --text-hi: #FFFFFF;        /* Pure white */
-  --text-mid: #c9c5d8;       /* Light gray-purple */
-  --text-lo: #8b85a3;        /* Subdued gray-purple */
-  --text-dim: #6b6578;       /* Barely visible */
+  /* Text — High contrast on light */
+  --text-hi: #0a0e27;        /* Deep navy */
+  --text-mid: #4a5578;       /* Sophisticated slate */
+  --text-lo: #7a8199;        /* Subdued gray */
+  --text-dim: #a5acbe;       /* Barely visible */
 
-  /* Borders — Subtle purple tint */
-  --border: #3d3450;
-  --border-soft: #2d2340;
+  /* Borders — Subtle blue tint */
+  --border: #d9e1f0;
+  --border-soft: #e5ecf5;
 
-  /* Primary accents — Vibrant blue and purple */
-  --teal: #00d9ff;           /* Bright cyan */
-  --teal-deep: #00a3cc;
-  --teal-glow: rgba(0, 217, 255, 0.25);
-  --violet: #b366ff;         /* Bright purple */
-  --violet-deep: #8b4db8;
-  --violet-glow: rgba(179, 102, 255, 0.25);
-  --blue: #6ba3ff;           /* Bright blue */
-  --blue-deep: #4870ff;
-  --blue-glow: rgba(107, 163, 255, 0.25);
-  --amber: #ffb347;          /* Warm accent */
-  --gold: #ffa500;
-  --rose: #ff6b7a;           /* Vibrant rose */
-  --rose-glow: rgba(255, 107, 122, 0.25);
+  /* Primary accents — Electric cobalt and royal blue */
+  --teal: #0a7dd9;           /* Electric cobalt */
+  --teal-deep: #0860a8;
+  --teal-glow: rgba(10, 125, 217, 0.15);
+  --violet: #5b62ff;         /* Vibrant indigo */
+  --violet-deep: #3d45c8;
+  --violet-glow: rgba(91, 98, 255, 0.15);
+  --blue: #0a7dd9;           /* Cobalt blue */
+  --blue-deep: #0560a8;
+  --blue-glow: rgba(10, 125, 217, 0.15);
+  --amber: #f59e0b;          /* Warm accent */
+  --gold: #d97706;
+  --rose: #dc2626;           /* Rose */
+  --rose-glow: rgba(220, 38, 38, 0.15);
 
   /* Tier colors */
-  --t1: #00d9ff;
-  --t2: #ffb347;
-  --t3: #b366ff;
+  --t1: #0a7dd9;
+  --t2: #f59e0b;
+  --t3: #5b62ff;
 
-  /* Gradients — Dramatic, modern */
-  --grad-primary: linear-gradient(135deg, #6ba3ff 0%, #8b4db8 100%);
-  --grad-violet: linear-gradient(135deg, #b366ff 0%, #8b4db8 100%);
-  --grad-warm: linear-gradient(135deg, #ffb347 0%, #ff8c42 100%);
-  --grad-logo: linear-gradient(120deg, #6ba3ff 0%, #b366ff 55%, #00d9ff 100%);
-  --grad-hero: linear-gradient(135deg, #1a1f4d 0%, #2d1b4e 40%, #4d1b7d 70%, #7d1b4d 100%);
+  /* Gradients — Premium, smooth */
+  --grad-primary: linear-gradient(135deg, #0a7dd9 0%, #5b62ff 100%);
+  --grad-violet: linear-gradient(135deg, #5b62ff 0%, #3d45c8 100%);
+  --grad-warm: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --grad-logo: linear-gradient(120deg, #0a7dd9 0%, #5b62ff 55%, #2563eb 100%);
+  --grad-hero: linear-gradient(180deg, #2e3192 0%, #1e3a8a 35%, #0a7dd9 65%, #ffffff 100%);
 
   /* On-primary text */
   --on-primary: #FFFFFF;
 
-  /* Shadows — Deep, impactful */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
-  --glow-teal: 0 0 20px rgba(0, 217, 255, 0.2);
-  --glow-violet: 0 0 20px rgba(179, 102, 255, 0.2);
-  --glow-blue: 0 0 24px rgba(107, 163, 255, 0.25);
+  /* Shadows — Subtle, refined */
+  --shadow-sm: 0 1px 3px rgba(10, 14, 39, 0.08);
+  --shadow-md: 0 4px 12px rgba(10, 14, 39, 0.12);
+  --shadow-lg: 0 12px 32px rgba(10, 14, 39, 0.15);
+  --glow-teal: 0 0 16px rgba(10, 125, 217, 0.12);
+  --glow-violet: 0 0 16px rgba(91, 98, 255, 0.12);
+  --glow-blue: 0 0 20px rgba(10, 125, 217, 0.14);
 
   /* Motion */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -87,32 +87,32 @@ html, body {
 #root { height: 100vh; position: relative; z-index: 1; }
 
 /* ============================================================
-   DRAMATIC GRADIENT BACKGROUND — Dark with purple/blue mesh
+   PREMIUM GRADIENT BACKGROUND — Indigo → Cobalt → White
    ============================================================ */
 .bg-mesh {
   position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-  background: linear-gradient(135deg, #0f0a1a 0%, #1a0f3a 40%, #2d1a4d 70%, #1a0f3a 100%);
+  background: linear-gradient(180deg, #2e3192 0%, #1e3a8a 20%, #0a7dd9 50%, #5bb3f5 75%, #ffffff 100%);
 }
-.bg-mesh span { position: absolute; border-radius: 50%; filter: blur(140px); }
+.bg-mesh span { position: absolute; border-radius: 50%; filter: blur(150px); }
 .bg-mesh .b1 {
-  width: 70vw; height: 70vw; top: -25vw; left: -20vw;
-  background: radial-gradient(circle, rgba(107, 163, 255, 0.15), transparent 70%);
-  animation: drift1 40s ease-in-out infinite;
+  width: 80vw; height: 80vw; top: -30vw; left: -25vw;
+  background: radial-gradient(circle, rgba(10, 125, 217, 0.08), transparent 70%);
+  animation: drift1 45s ease-in-out infinite;
 }
 .bg-mesh .b2 {
-  width: 60vw; height: 60vw; bottom: -22vw; right: -15vw;
-  background: radial-gradient(circle, rgba(179, 102, 255, 0.12), transparent 70%);
-  animation: drift2 45s ease-in-out infinite;
+  width: 70vw; height: 70vw; bottom: -25vw; right: -20vw;
+  background: radial-gradient(circle, rgba(91, 98, 255, 0.06), transparent 70%);
+  animation: drift2 50s ease-in-out infinite;
 }
 .bg-mesh .b3 {
-  width: 50vw; height: 50vw; top: 50%; right: 10%;
-  background: radial-gradient(circle, rgba(0, 217, 255, 0.08), transparent 70%);
-  animation: drift3 50s ease-in-out infinite;
+  width: 60vw; height: 60vw; top: 50%; right: 5%;
+  background: radial-gradient(circle, rgba(10, 125, 217, 0.04), transparent 70%);
+  animation: drift3 55s ease-in-out infinite;
 }
 .bg-mesh .b4 { display: none; }
-@keyframes drift1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(8vw, 6vw) scale(1.12); } }
-@keyframes drift2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-8vw, -6vw) scale(1.1); } }
-@keyframes drift3 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-6vw, 8vw) scale(1.15); } }
+@keyframes drift1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(8vw, 6vw) scale(1.08); } }
+@keyframes drift2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-8vw, -6vw) scale(1.08); } }
+@keyframes drift3 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-6vw, 8vw) scale(1.1); } }
 
 /* ============================================================
    SCROLLBAR
@@ -120,10 +120,10 @@ html, body {
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(107, 163, 255, 0.3); border-radius: 99px;
+  background: rgba(10, 125, 217, 0.25); border-radius: 99px;
   border: 2px solid transparent; background-clip: padding-box;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(107, 163, 255, 0.5); background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(10, 125, 217, 0.4); background-clip: padding-box; }
 
 /* ============================================================
    ANIMATIONS / UTILITIES

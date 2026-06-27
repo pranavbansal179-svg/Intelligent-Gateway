@@ -102,16 +102,16 @@ const styles = {
   /* Cache banner */
   cacheBanner: {
     display: "flex", alignItems: "center", gap: 8, padding: "7px 12px",
-    background: "linear-gradient(90deg, rgba(0, 217, 255, 0.12), transparent)",
-    border: "1px solid rgba(0, 217, 255, 0.25)", borderRadius: 10,
+    background: "linear-gradient(90deg, rgba(10, 125, 217, 0.1), transparent)",
+    border: "1px solid rgba(10, 125, 217, 0.15)", borderRadius: 10,
   },
-  cacheIcon: { color: "var(--teal)", fontSize: 13, textShadow: "0 0 10px var(--teal)" },
+  cacheIcon: { color: "var(--teal)", fontSize: 13, textShadow: "0 0 10px rgba(10, 125, 217, 0.3)" },
   cacheLabel: { color: "var(--teal)", fontSize: 11.5, fontWeight: 800, letterSpacing: "0.03em" },
   cacheText: { color: "var(--text-lo)", fontSize: 11 },
   cacheSpeed: {
     fontSize: 10.5, fontWeight: 800, color: "var(--teal)",
-    background: "color-mix(in srgb, var(--teal) 18%, transparent)",
-    border: "1px solid color-mix(in srgb, var(--teal) 40%, transparent)",
+    background: "color-mix(in srgb, var(--teal) 14%, transparent)",
+    border: "1px solid color-mix(in srgb, var(--teal) 30%, transparent)",
     borderRadius: 99, padding: "2px 9px", fontFamily: "'JetBrains Mono', monospace",
   },
   cacheCost: { marginLeft: "auto", color: "var(--teal)", fontSize: 11.5, fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" },
@@ -120,8 +120,8 @@ const styles = {
   optimizerBanner: {
     display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
     padding: "7px 12px", borderRadius: 10, flexWrap: "wrap",
-    background: "linear-gradient(90deg, rgba(179, 102, 255, 0.12), transparent)",
-    border: "1px solid rgba(179, 102, 255, 0.25)",
+    background: "linear-gradient(90deg, rgba(91, 98, 255, 0.1), transparent)",
+    border: "1px solid rgba(91, 98, 255, 0.15)",
   },
   optimizerLeft: { display: "flex", alignItems: "center", gap: 6 },
   optimizerIcon: { color: "var(--violet)", fontSize: 12 },
