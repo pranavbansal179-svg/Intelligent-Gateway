@@ -138,14 +138,40 @@ def _get_spent(session_id: str) -> float:
     return _session_spend.get(session_id, 0.0)
 
 
-def _record_call_cost(session_id: str, model: str, response: dict) -> tuple[float, float]:
+def _estimate_tokens(text: str) -> int:
+    """
+    Rough token estimate when the provider omits usage data.
+    ~4 characters per token is the standard heuristic for English text.
+    """
+    return max(1, round(len(text or "") / 4))
+
+
+def _record_call_cost(
+    session_id: str,
+    model: str,
+    response: dict,
+    sent_messages: list[dict] | None = None,
+    answer: str | None = None,
+) -> tuple[float, float]:
     """
     Extract token counts, calculate actual cost and naive (Tier 3) cost.
     Returns (call_cost, naive_cost).
+
+    Otari's usage reporting is unreliable — some models (e.g. Hermes-4-70B)
+    return zero tokens. When that happens we fall back to estimating tokens
+    from the actual prompt and completion text so cost is never bogusly $0.
     """
     usage = response.get("usage") or {}
     prompt_tokens = usage.get("prompt_tokens", 0) or 0
     completion_tokens = usage.get("completion_tokens", 0) or 0
+
+    estimated = False
+    if prompt_tokens == 0 and sent_messages:
+        prompt_tokens = sum(_estimate_tokens(m.get("content", "")) for m in sent_messages)
+        estimated = True
+    if completion_tokens == 0 and answer:
+        completion_tokens = _estimate_tokens(answer)
+        estimated = True
 
     input_price, output_price = _MODEL_PRICING.get(model, _DEFAULT_PRICING)
     call_cost = (prompt_tokens * input_price + completion_tokens * output_price) / 1_000_000
@@ -157,9 +183,10 @@ def _record_call_cost(session_id: str, model: str, response: dict) -> tuple[floa
     _session_naive_spend[session_id] = _session_naive_spend.get(session_id, 0.0) + naive_cost
 
     logger.info(
-        "COST | session=%s | model=%s | prompt=%d tok | completion=%d tok | "
+        "COST | session=%s | model=%s | prompt=%d tok | completion=%d tok%s | "
         "actual=$%.6f | naive=$%.6f | saved=$%.6f | session_total=$%.4f",
         session_id, model, prompt_tokens, completion_tokens,
+        " (estimated)" if estimated else "",
         call_cost, naive_cost, naive_cost - call_cost, _session_spend[session_id],
     )
     return call_cost, naive_cost
@@ -325,7 +352,9 @@ async def chat(request: ChatRequest):
     # ------------------------------------------------------------------
     # 6. Record cost and populate semantic cache for future lookups
     # ------------------------------------------------------------------
-    call_cost, naive_cost = _record_call_cost(session_id, model, raw_response)
+    call_cost, naive_cost = _record_call_cost(
+        session_id, model, raw_response, sent_messages=messages, answer=answer
+    )
     semantic_cache.store(
         query=message,
         answer=answer,
