@@ -488,27 +488,27 @@ const styles = {
   /* Header */
   header: {
     display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "14px 24px", background: "var(--glass)", backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid var(--glass-border)",
+    padding: "16px 28px", background: "var(--glass)", backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid var(--glass-border)",
     zIndex: 10,
   },
-  brand: { display: "flex", alignItems: "center", gap: 12 },
+  brand: { display: "flex", alignItems: "center", gap: 14 },
   logoWrap: { position: "relative", width: 40, height: 40, flexShrink: 0 },
   logoRing: {
     position: "absolute", inset: -1, borderRadius: 13,
-    background: "conic-gradient(from 0deg, #3D6BFF, #6C4DF6, #00A982, #3D6BFF)",
-    filter: "blur(2px)", opacity: 0.45, animation: "spinSlow 8s linear infinite",
+    background: "conic-gradient(from 0deg, #4870c5, #6b5fa3, #087857, #4870c5)",
+    filter: "blur(1.5px)", opacity: 0.35, animation: "spinSlow 10s linear infinite",
   },
   logoMark: {
     position: "relative", width: 40, height: 40, borderRadius: 12,
-    background: "linear-gradient(135deg, #EEF3FF, #DDEAFF)",
-    border: "1px solid rgba(45, 91, 255, 0.18)",
+    background: "linear-gradient(135deg, #f0f4f8, #eef0f4)",
+    border: "1px solid rgba(72, 112, 197, 0.12)",
     display: "flex", alignItems: "center", justifyContent: "center",
   },
-  brandName: { display: "flex", alignItems: "baseline", gap: 8 },
-  logoText: { fontWeight: 900, fontSize: 20, letterSpacing: "-0.02em" },
-  brandSub: { color: "var(--text-mid)", fontSize: 14, fontWeight: 500 },
-  brandTag: { color: "var(--text-lo)", fontSize: 11, marginTop: 1, letterSpacing: "0.01em" },
+  brandName: { display: "flex", alignItems: "baseline", gap: 10 },
+  logoText: { fontWeight: 800, fontSize: 20, letterSpacing: "-0.02em", color: "var(--text-hi)" },
+  brandSub: { color: "var(--text-mid)", fontSize: 13, fontWeight: 500 },
+  brandTag: { color: "var(--text-lo)", fontSize: 10.5, marginTop: 2, letterSpacing: "0.03em", fontWeight: 500 },
   headerStats: { display: "flex", alignItems: "center", gap: 10 },
   statPill: {
     display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.15,
@@ -519,8 +519,8 @@ const styles = {
   statPillLabel: { fontSize: 9, color: "var(--text-lo)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 },
   statPillValue: { fontSize: 14, fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" },
   ghostBtn: {
-    background: "var(--bg-2)", border: "1px solid var(--border)", color: "var(--text-mid)",
-    borderRadius: 10, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
+    background: "transparent", border: "1px solid var(--border)", color: "var(--text-mid)",
+    borderRadius: 9, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer",
     transition: "all 0.2s var(--ease)",
   },
 
@@ -547,9 +547,9 @@ const styles = {
   newChatBtn: {
     position: "relative", overflow: "hidden",
     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-    width: "100%", padding: "12px", marginBottom: 6, borderRadius: 12, border: "none",
+    width: "100%", padding: "12px", marginBottom: 8, borderRadius: 11, border: "none",
     background: "var(--grad-primary)", color: "var(--on-primary)", fontWeight: 700, fontSize: 13.5,
-    cursor: "pointer", boxShadow: "0 4px 14px rgba(45, 91, 255, 0.30)", transition: "all 0.22s var(--ease)",
+    cursor: "pointer", boxShadow: "0 2px 8px rgba(72, 112, 197, 0.18)", transition: "all 0.22s var(--ease)",
     flexShrink: 0,
   },
   newChatPlus: { fontSize: 17, fontWeight: 700, lineHeight: 1 },
@@ -637,14 +637,14 @@ const styles = {
     background: "color-mix(in srgb, var(--blue) 8%, transparent)", marginBottom: 20,
     letterSpacing: "0.01em",
   },
-  emptyTitle: { fontSize: 34, fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.15, marginBottom: 12, color: "var(--text-hi)" },
-  emptyText: { color: "var(--text-mid)", fontSize: 15, maxWidth: 460, lineHeight: 1.7, marginBottom: 32 },
-  tierLegend: { display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap", justifyContent: "center" },
+  emptyTitle: { fontSize: 36, fontWeight: 700, letterSpacing: "-0.028em", lineHeight: 1.2, marginBottom: 14, color: "var(--text-hi)", fontFamily: "'Crimson Text', serif" },
+  emptyText: { color: "var(--text-mid)", fontSize: 15, maxWidth: 480, lineHeight: 1.8, marginBottom: 36, fontWeight: 500 },
+  tierLegend: { display: "flex", gap: 14, marginBottom: 32, flexWrap: "wrap", justifyContent: "center" },
   tierCard: {
     position: "relative",
-    display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 5,
-    padding: "18px 20px", background: "var(--bg-1)",
-    border: "1px solid var(--border)", borderRadius: 16, minWidth: 158,
+    display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6,
+    padding: "20px 22px", background: "var(--bg-1)",
+    border: "1px solid var(--border)", borderRadius: 14, minWidth: 165,
     transition: "transform 0.22s var(--ease), box-shadow 0.22s var(--ease)",
     boxShadow: "var(--shadow-sm)",
   },
@@ -686,19 +686,19 @@ const styles = {
   },
   sendBtn: {
     display: "flex", alignItems: "center", justifyContent: "center",
-    background: "var(--grad-primary)", color: "var(--on-primary)", border: "none", borderRadius: 11,
+    background: "var(--grad-primary)", color: "var(--on-primary)", border: "none", borderRadius: 10,
     padding: "11px 22px", fontWeight: 700, fontSize: 14, cursor: "pointer",
-    transition: "all 0.2s var(--ease)", boxShadow: "0 4px 14px rgba(45, 91, 255, 0.28)", minWidth: 92,
+    transition: "all 0.2s var(--ease)", boxShadow: "0 2px 8px rgba(72, 112, 197, 0.16)", minWidth: 92,
   },
-  inputHint: { textAlign: "center", fontSize: 11, color: "var(--text-dim)", marginTop: 9 },
+  inputHint: { textAlign: "center", fontSize: 10.5, color: "var(--text-dim)", marginTop: 10, fontWeight: 500 },
 
   /* CSS injected block */
   css: `
     /* Sidebar children must keep natural height so the sidebar scrolls */
     .sidebar > * { flex-shrink: 0; }
 
-    .hover-lift:hover { transform: translateY(-1px); border-color: var(--border); color: var(--text-hi); }
-    .newchat-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,91,255,0.38); filter: brightness(1.06); }
+    .hover-lift:hover { transform: translateY(-0.5px); border-color: var(--border); color: var(--text-hi); }
+    .newchat-btn:hover { transform: translateY(-0.5px); box-shadow: 0 4px 12px rgba(72,112,197,0.22); filter: brightness(1.04); }
     .newchat-btn:active { transform: translateY(0); }
     .chat-item:hover { background: var(--bg-3); }
     .chat-item:hover .delete-chat-btn { opacity: 1; }
@@ -710,7 +710,7 @@ const styles = {
     .tier-card { animation: popIn 0.45s var(--ease-spring) backwards; }
     .tier-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
     .input-bar:focus-within { border-color: color-mix(in srgb, var(--blue) 50%, transparent); box-shadow: 0 0 0 3px rgba(45,91,255,0.10), var(--shadow-md); }
-    .send-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 6px 18px rgba(45,91,255,0.38); }
+    .send-btn:hover:not(:disabled) { transform: translateY(-0.5px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(72,112,197,0.22); }
     .send-btn:active:not(:disabled) { transform: translateY(0); }
     .toast-in { animation: popIn 0.3s var(--ease-spring); }
 

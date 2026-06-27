@@ -87,12 +87,12 @@ const styles = {
     fontSize: 11, padding: "3px 9px", borderRadius: 99, fontWeight: 700,
     fontFamily: "'JetBrains Mono', monospace",
   },
-  reason: { fontSize: 11.5, color: "var(--text-lo)" },
+  reason: { fontSize: 11, color: "var(--text-mid)", fontWeight: 500 },
   spacer: { flex: 1 },
   latency: {
-    fontSize: 10.5, fontWeight: 700, color: "var(--text-lo)",
+    fontSize: 10, fontWeight: 600, color: "var(--text-lo)",
     fontFamily: "'JetBrains Mono', monospace",
-    background: "var(--bg-3)", borderRadius: 99, padding: "2px 8px",
+    background: "transparent", borderRadius: 99, padding: "0",
   },
   cost: {
     fontSize: 11.5, fontWeight: 700, color: "var(--teal)",

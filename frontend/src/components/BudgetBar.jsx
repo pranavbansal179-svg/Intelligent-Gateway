@@ -79,35 +79,35 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
 
 const styles = {
   wrapper: {
-    padding: "9px 24px 11px", background: "var(--glass)", backdropFilter: "blur(16px)",
+    padding: "10px 28px 12px", background: "var(--glass)", backdropFilter: "blur(16px)",
     WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid var(--glass-border)", zIndex: 9,
   },
-  row: { display: "flex", alignItems: "center", gap: 9, marginBottom: 7, flexWrap: "wrap" },
+  row: { display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" },
   label: {
-    fontSize: 11, color: "var(--text-lo)", fontWeight: 700,
-    letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0,
+    fontSize: 10, color: "var(--text-lo)", fontWeight: 600,
+    letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0,
   },
   badge: {
-    fontSize: 10.5, fontWeight: 800, padding: "2px 10px", borderRadius: 99,
-    border: "1px solid", letterSpacing: "0.03em", flexShrink: 0,
+    fontSize: 10, fontWeight: 700, padding: "3px 11px", borderRadius: 99,
+    border: "1px solid", letterSpacing: "0.04em", flexShrink: 0,
   },
   flash: {
-    fontSize: 10.5, fontWeight: 800, color: "var(--amber)",
-    background: "color-mix(in srgb, var(--amber) 14%, transparent)",
-    border: "1px solid color-mix(in srgb, var(--amber) 35%, transparent)",
-    borderRadius: 99, padding: "2px 10px", fontFamily: "'JetBrains Mono', monospace",
+    fontSize: 10, fontWeight: 700, color: "var(--amber)",
+    background: "color-mix(in srgb, var(--amber) 10%, transparent)",
+    border: "1px solid color-mix(in srgb, var(--amber) 30%, transparent)",
+    borderRadius: 99, padding: "3px 11px", fontFamily: "'JetBrains Mono', monospace",
   },
   amounts: {
-    fontSize: 12, fontWeight: 600, marginLeft: "auto",
+    fontSize: 11.5, fontWeight: 500, marginLeft: "auto",
     fontFamily: "'JetBrains Mono', monospace", whiteSpace: "nowrap",
     display: "flex", alignItems: "center", gap: 4,
   },
-  muted: { color: "var(--text-lo)", fontWeight: 500 },
+  muted: { color: "var(--text-lo)", fontWeight: 400 },
   sep: { color: "var(--text-dim)" },
-  cap: { color: "var(--text-mid)", fontWeight: 700 },
+  cap: { color: "var(--text-mid)", fontWeight: 600 },
   track: {
-    height: 7, background: "var(--bg-3)", borderRadius: 99, overflow: "hidden",
-    border: "1px solid var(--border-soft)",
+    height: 6, background: "var(--bg-3)", borderRadius: 99, overflow: "hidden",
+    border: "1px solid var(--border)",
   },
   fill: { height: "100%", borderRadius: 99, transition: "width 0.6s var(--ease)" },
 };

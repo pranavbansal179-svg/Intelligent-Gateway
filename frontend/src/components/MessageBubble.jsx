@@ -20,11 +20,11 @@ function renderContent(text) {
       const txt = trimmed.replace(/^#+\s/, "");
       return (
         <div key={key} style={{
-          fontSize: level <= 2 ? 16 : 14,
-          fontWeight: 800,
+          fontSize: level <= 2 ? 17 : 15,
+          fontWeight: 700,
           color: "var(--text-hi)",
-          margin: "12px 0 4px",
-          letterSpacing: "-0.01em",
+          margin: "14px 0 6px",
+          letterSpacing: "-0.015em",
         }}>{inline(txt)}</div>
       );
     }
@@ -60,8 +60,8 @@ function inline(text) {
   return parts.map((p, i) => {
     if (/^\*\*[^*]+\*\*$/.test(p)) return <strong key={i} style={{ color: "var(--text-hi)", fontWeight: 700 }}>{p.slice(2, -2)}</strong>;
     if (/^`[^`]+`$/.test(p)) return <code key={i} style={{
-      fontFamily: "'JetBrains Mono', monospace", fontSize: "0.88em",
-      background: "var(--bg-3)", padding: "1px 6px", borderRadius: 5, color: "var(--teal)",
+      fontFamily: "'JetBrains Mono', monospace", fontSize: "0.86em",
+      background: "color-mix(in srgb, var(--blue) 8%, transparent)", padding: "2px 7px", borderRadius: 4, color: "var(--blue)", fontWeight: 500,
     }}>{p.slice(1, -1)}</code>;
     return p;
   });
@@ -115,25 +115,25 @@ export default function MessageBubble({ role, content, metadata, blocked }) {
 }
 
 const styles = {
-  wrapper: { display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 22 },
+  wrapper: { display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 24 },
   avatar: {
-    width: 34, height: 34, borderRadius: 12, flexShrink: 0, marginTop: 2,
-    background: "linear-gradient(135deg, #EEF3FF, #DDEAFF)",
-    border: "1px solid rgba(45, 91, 255, 0.16)", display: "flex", alignItems: "center",
+    width: 36, height: 36, borderRadius: 10, flexShrink: 0, marginTop: 2,
+    background: "linear-gradient(135deg, rgba(72, 112, 197, 0.08), rgba(8, 120, 87, 0.08))",
+    border: "1px solid rgba(72, 112, 197, 0.12)", display: "flex", alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { color: "var(--blue)", fontWeight: 800, fontSize: 14 },
+  avatarText: { color: "var(--blue)", fontWeight: 700, fontSize: 13 },
   bubble: {
-    padding: "14px 18px", borderRadius: 18, lineHeight: 1.7, fontSize: 14.5,
-    color: "var(--text-hi)", wordBreak: "break-word",
+    padding: "14px 18px", borderRadius: 12, lineHeight: 1.7, fontSize: 14.5,
+    color: "var(--text-hi)", wordBreak: "break-word", fontWeight: 450,
   },
   userBubble: {
-    background: "var(--grad-primary)", color: "var(--on-primary)", borderBottomRightRadius: 5,
-    fontWeight: 500, boxShadow: "0 4px 14px rgba(45, 91, 255, 0.28)",
+    background: "var(--grad-primary)", color: "var(--on-primary)", borderBottomRightRadius: 4,
+    fontWeight: 500, boxShadow: "0 2px 8px rgba(72, 112, 197, 0.16)",
   },
   assistantBubble: {
     background: "var(--bg-1)", border: "1px solid var(--border)",
-    borderBottomLeftRadius: 5, boxShadow: "var(--shadow-sm)",
+    borderBottomLeftRadius: 4, boxShadow: "var(--shadow-sm)",
     color: "var(--text-hi)",
   },
   blockedBubble: {

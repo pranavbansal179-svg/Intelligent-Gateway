@@ -1,70 +1,69 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Crimson+Text:wght@400;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 /* ============================================================
-   DESIGN TOKENS — bright "Arcade" light theme
+   DESIGN TOKENS — Premium fintech aesthetic
    ============================================================ */
 :root {
-  /* Surfaces */
-  --bg-0: #F4F6FB;   /* page */
+  /* Surfaces — Refined neutrals */
+  --bg-0: #F9F7F5;   /* page — warm cream */
   --bg-1: #FFFFFF;   /* cards/panels */
-  --bg-2: #FFFFFF;
-  --bg-3: #EEF1F8;   /* hover */
-  --bg-4: #E2E7F2;
+  --bg-2: #FDFCFB;   /* subtle variations */
+  --bg-3: #F5F3F1;   /* hover — barely visible */
+  --bg-4: #EFE9E4;   /* pressed */
 
-  /* Glass */
-  --glass: rgba(255, 255, 255, 0.72);
-  --glass-hi: rgba(255, 255, 255, 0.88);
-  --glass-border: rgba(18, 28, 64, 0.08);
-  --glass-border-hi: rgba(18, 28, 64, 0.14);
+  /* Glass — Subtle frosted effect */
+  --glass: rgba(255, 255, 255, 0.75);
+  --glass-hi: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(50, 45, 40, 0.05);
+  --glass-border-hi: rgba(50, 45, 40, 0.10);
 
-  /* Text */
-  --text-hi: #0B1020;
-  --text-mid: #4B5469;
-  --text-lo: #8089A0;
-  --text-dim: #AEB6C8;
+  /* Text — Premium hierarchy */
+  --text-hi: #1a1714;    /* Near-black, warm */
+  --text-mid: #5c5955;   /* Sophisticated gray */
+  --text-lo: #8a8480;    /* Subdued gray */
+  --text-dim: #a9a39d;   /* Barely visible */
 
-  /* Borders */
-  --border: #E5E9F2;
-  --border-soft: #EEF1F7;
+  /* Borders — Subtle, refined */
+  --border: #e5e0db;
+  --border-soft: #efeae4;
 
-  /* Accents (tuned for contrast on white) */
-  --teal: #00A982;
-  --teal-deep: #008E6E;
-  --teal-glow: rgba(0, 169, 130, 0.28);
-  --violet: #6C4DF6;
-  --violet-deep: #5A36F0;
-  --violet-glow: rgba(108, 77, 246, 0.26);
-  --blue: #2D5BFF;
-  --blue-deep: #1E40D8;
-  --blue-glow: rgba(45, 91, 255, 0.30);
-  --amber: #E68A00;
-  --gold: #CE9400;
-  --rose: #F43F5E;
-  --rose-glow: rgba(244, 63, 94, 0.24);
+  /* Primary accent — Sophisticated emerald */
+  --teal: #087857;        /* Deeper, more professional */
+  --teal-deep: #065f47;
+  --teal-glow: rgba(8, 120, 87, 0.18);
+  --violet: #6b5fa3;      /* Muted purple */
+  --violet-deep: #5a4a8f;
+  --violet-glow: rgba(107, 95, 163, 0.15);
+  --blue: #4870c5;        /* Professional blue */
+  --blue-deep: #3a5fa3;
+  --blue-glow: rgba(72, 112, 197, 0.18);
+  --amber: #c47e1f;       /* Warm, earthy */
+  --gold: #a66a1f;
+  --rose: #c85a5a;        /* Muted rose */
+  --rose-glow: rgba(200, 90, 90, 0.15);
 
   /* Tier colors */
-  --t1: #00A982;
-  --t2: #D9920A;
-  --t3: #F2683A;
+  --t1: #087857;
+  --t2: #c47e1f;
+  --t3: #8b6a47;
 
-  /* Gradients */
-  --grad-primary: linear-gradient(135deg, #3D6BFF 0%, #1E40D8 100%);
-  --grad-violet: linear-gradient(135deg, #8B6CFF 0%, #5A36F0 100%);
-  --grad-warm: linear-gradient(135deg, #FFB020 0%, #F2683A 100%);
-  --grad-logo: linear-gradient(120deg, #2D5BFF 0%, #5A36F0 55%, #00A982 100%);
-  /* Big hero mesh: light top-left → vivid blue corner (Arcade-style) */
-  --grad-hero: linear-gradient(135deg, #EEF3FF 0%, #C9D8FF 30%, #5C86FF 62%, #1E40D8 100%);
+  /* Gradients — Subtle, premium */
+  --grad-primary: linear-gradient(135deg, #4870c5 0%, #3a5fa3 100%);
+  --grad-violet: linear-gradient(135deg, #8b7fa9 0%, #6b5fa3 100%);
+  --grad-warm: linear-gradient(135deg, #c9a86e 0%, #8b6a47 100%);
+  --grad-logo: linear-gradient(120deg, #4870c5 0%, #6b5fa3 55%, #087857 100%);
+  --grad-hero: linear-gradient(135deg, #f9f7f5 0%, #efeae4 40%, #d9cec5 70%, #bfb0a0 100%);
 
   /* On-primary text */
   --on-primary: #FFFFFF;
 
-  /* Shadows — soft, light */
-  --shadow-sm: 0 1px 3px rgba(20, 30, 70, 0.06);
-  --shadow-md: 0 10px 30px rgba(20, 30, 70, 0.10);
-  --shadow-lg: 0 24px 60px rgba(20, 30, 70, 0.16);
-  --glow-teal: 0 6px 20px rgba(0, 169, 130, 0.22);
-  --glow-violet: 0 6px 20px rgba(108, 77, 246, 0.22);
-  --glow-blue: 0 8px 26px rgba(45, 91, 255, 0.30);
+  /* Shadows — Refined, softer */
+  --shadow-sm: 0 1px 2px rgba(26, 23, 20, 0.04);
+  --shadow-md: 0 4px 12px rgba(26, 23, 20, 0.08);
+  --shadow-lg: 0 12px 32px rgba(26, 23, 20, 0.12);
+  --glow-teal: 0 4px 16px rgba(8, 120, 87, 0.14);
+  --glow-violet: 0 4px 16px rgba(107, 95, 163, 0.12);
+  --glow-blue: 0 4px 16px rgba(72, 112, 197, 0.14);
 
   /* Motion */
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -77,41 +76,42 @@ html, body {
   height: 100%;
   background: var(--bg-0);
   color: var(--text-hi);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow: hidden;
+  letter-spacing: -0.3px;
 }
 
 #root { height: 100vh; position: relative; z-index: 1; }
 
 /* ============================================================
-   SOFT LIGHT MESH BACKGROUND
+   MINIMAL ELEGANT BACKGROUND — Warm neutral with soft accents
    ============================================================ */
 .bg-mesh {
   position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
 }
-.bg-mesh span { position: absolute; border-radius: 50%; filter: blur(110px); }
+.bg-mesh span { position: absolute; border-radius: 50%; filter: blur(120px); }
 .bg-mesh .b1 {
-  width: 50vw; height: 50vw; top: -18vw; left: -10vw;
-  background: radial-gradient(circle, rgba(45, 91, 255, 0.09), transparent 70%);
-  animation: drift1 28s ease-in-out infinite;
+  width: 60vw; height: 60vw; top: -20vw; left: -15vw;
+  background: radial-gradient(circle, rgba(72, 112, 197, 0.04), transparent 70%);
+  animation: drift1 35s ease-in-out infinite;
 }
 .bg-mesh .b2 {
-  width: 44vw; height: 44vw; bottom: -16vw; right: -8vw;
-  background: radial-gradient(circle, rgba(108, 77, 246, 0.07), transparent 70%);
-  animation: drift2 34s ease-in-out infinite;
+  width: 50vw; height: 50vw; bottom: -18vw; right: -10vw;
+  background: radial-gradient(circle, rgba(8, 120, 87, 0.03), transparent 70%);
+  animation: drift2 40s ease-in-out infinite;
 }
 .bg-mesh .b3 {
-  width: 36vw; height: 36vw; top: 40%; right: 22%;
-  background: radial-gradient(circle, rgba(0, 169, 130, 0.05), transparent 70%);
-  animation: drift3 40s ease-in-out infinite;
+  width: 45vw; height: 45vw; top: 45%; right: 15%;
+  background: radial-gradient(circle, rgba(200, 126, 31, 0.02), transparent 70%);
+  animation: drift3 45s ease-in-out infinite;
 }
 .bg-mesh .b4 { display: none; }
-@keyframes drift1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(8vw, 6vw) scale(1.12); } }
-@keyframes drift2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-7vw, -5vw) scale(1.1); } }
-@keyframes drift3 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-5vw, 7vw) scale(1.18); } }
+@keyframes drift1 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6vw, 4vw) scale(1.08); } }
+@keyframes drift2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-6vw, -4vw) scale(1.08); } }
+@keyframes drift3 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-4vw, 5vw) scale(1.1); } }
 
 /* ============================================================
    SCROLLBAR
@@ -158,9 +158,11 @@ html, body {
 }
 
 input:focus, textarea:focus { outline: none; }
-input::placeholder { color: var(--text-lo); }
+input::placeholder { color: var(--text-dim); opacity: 0.9; }
 button { font-family: inherit; }
 button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+h1, h2, h3, h4, h5, h6 { font-family: 'Crimson Text', serif; }
 
 @media (prefers-reduced-motion: reduce) {
   *, .bg-mesh span { animation: none !important; }
