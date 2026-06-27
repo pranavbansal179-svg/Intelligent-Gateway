@@ -464,9 +464,10 @@ export default function ChatWindow() {
                       return (
                         <button
                           key={f.id}
+                          className="feature-chip-btn"
                           style={{
                             ...styles.heroFeatureTag,
-                            background: active ? "rgba(255,255,255,0.82)" : "rgba(255,255,255,0.55)",
+                            background: active ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.55)",
                             border: active ? "1px solid rgba(255,255,255,0.9)" : "1px solid rgba(255,255,255,0.45)",
                             color: active ? "#0B1020" : "rgba(20,30,70,0.80)",
                             fontWeight: active ? 700 : 500,
@@ -963,6 +964,8 @@ const styles = {
     .input-bar:focus-within { border-color: rgba(45,91,255,0.45); box-shadow: 0 0 0 3px rgba(45,91,255,0.09); }
     .send-btn:hover:not(:disabled) { transform: scale(1.07); box-shadow: 0 5px 16px rgba(45,91,255,0.42); }
     .send-btn:active:not(:disabled) { transform: scale(0.97); }
+    .feature-chip-btn:hover { background: rgba(255,255,255,0.88) !important; transform: translateY(-3px) scale(1.05) !important; box-shadow: 0 6px 18px rgba(20,30,70,0.16) !important; color: #0B1020 !important; border-color: rgba(255,255,255,0.95) !important; }
+    .feature-chip-btn:active { transform: translateY(0) scale(0.97) !important; }
     .toast-in { animation: popIn 0.3s var(--ease-spring); }
 
     .typing-dot {
