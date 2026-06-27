@@ -361,56 +361,45 @@ export default function ChatWindow() {
           <div style={styles.messageList}>
             {activeChat.messages.length === 0 && (
               <div style={styles.emptyState}>
-                <div style={styles.emptyGlow} />
-                <div style={styles.emptyBadge}>⚡ Powered by smart routing</div>
-                <h1 style={styles.emptyTitle}>
-                  Ask anything about <span className="grad-text">money</span>.
-                </h1>
-                <p style={styles.emptyText}>
-                  Simple questions go to fast, cheap models. Complex ones escalate to frontier models —
-                  saving budget on every query without sacrificing quality.
-                </p>
-                <div style={styles.tierLegend}>
-                  {[
-                    { tier: "T1", label: "Simple", desc: "Qwen3-30B", color: "var(--t1)", icon: "◆", role: "Definitions & quick facts" },
-                    { tier: "T2", label: "Moderate", desc: "Llama-3.3-70B", color: "var(--t2)", icon: "◆◆", role: "Trade-offs & comparisons" },
-                    { tier: "T3", label: "Complex", desc: "Hermes-4-70B", color: "var(--t3)", icon: "◆◆◆", role: "Full financial plans" },
-                  ].map(({ tier, label, desc, color, icon, role }, i) => (
-                    <div
-                      key={tier}
-                      style={{
-                        ...styles.tierCard,
-                        animationDelay: `${0.15 + i * 0.1}s`,
-                        borderLeft: `3px solid ${color}`,
-                      }}
-                      className="tier-card"
-                    >
-                      <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 14%, transparent)`, borderColor: `color-mix(in srgb, ${color} 30%, transparent)` }}>{tier}</span>
-                      <span style={styles.tierName}>{label}</span>
-                      <span style={styles.tierModel}>{desc}</span>
-                      <span style={styles.tierRole}>{role}</span>
-                    </div>
-                  ))}
+                {/* Arcade-style gradient hero panel */}
+                <div style={styles.heroPanel}>
+                  <span style={styles.heroBadge}>Intelligent LLM routing</span>
+                  <h1 style={styles.heroTitle}>
+                    Ask anything<br />about <em style={styles.heroEm}>money.</em>
+                  </h1>
+                  <p style={styles.heroSub}>
+                    Simple questions go to fast, cheap models. Complex ones escalate automatically —
+                    saving budget on every query without sacrificing quality.
+                  </p>
+                  <div style={styles.heroDivider} />
+                  <div style={styles.heroFeatures}>
+                    {["⚡ Semantic cache", "✦ Prompt optimizer", "🛡 Injection guard", "📈 Live stock data"].map((f) => (
+                      <span key={f} style={styles.heroFeatureTag}>{f}</span>
+                    ))}
+                  </div>
                 </div>
-                <div style={styles.featureRow}>
-                  {[
-                    { icon: "⚡", label: "Semantic cache", color: "var(--teal)" },
-                    { icon: "✦", label: "Prompt optimizer", color: "var(--violet)" },
-                    { icon: "🛡", label: "Injection guard", color: "var(--rose)" },
-                    { icon: "📈", label: "Live stock data", color: "var(--blue)" },
-                  ].map((f) => (
-                    <span
-                      key={f.label}
-                      style={{
-                        ...styles.featureChip,
-                        color: f.color,
-                        background: `color-mix(in srgb, ${f.color} 12%, transparent)`,
-                        borderColor: `color-mix(in srgb, ${f.color} 32%, transparent)`,
-                      }}
-                    >
-                      {f.icon} {f.label}
-                    </span>
-                  ))}
+
+                {/* Clean white cards section */}
+                <div style={styles.tierSection}>
+                  <p style={styles.tierSectionLabel}>How routing works</p>
+                  <div style={styles.tierLegend}>
+                    {[
+                      { tier: "T1", label: "Simple questions", desc: "Qwen3-30B", color: "var(--t1)", role: "Definitions, quick facts, basic math" },
+                      { tier: "T2", label: "Moderate analysis", desc: "Llama-3.3-70B", color: "var(--t2)", role: "Trade-offs, comparisons, budgeting" },
+                      { tier: "T3", label: "Complex planning", desc: "Hermes-4-70B", color: "var(--t3)", role: "Full financial plans, multi-step strategies" },
+                    ].map(({ tier, label, desc, color, role }, i) => (
+                      <div
+                        key={tier}
+                        style={{ ...styles.tierCard, animationDelay: `${0.1 + i * 0.08}s`, borderLeft: `3px solid ${color}` }}
+                        className="tier-card"
+                      >
+                        <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 12%, transparent)`, borderColor: `color-mix(in srgb, ${color} 28%, transparent)` }}>{tier}</span>
+                        <span style={styles.tierName}>{label}</span>
+                        <span style={styles.tierModel}>{desc}</span>
+                        <span style={styles.tierRole}>{role}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -448,12 +437,16 @@ export default function ChatWindow() {
                 disabled={loading || exhausted}
               />
               <button
-                style={{ ...styles.sendBtn, opacity: loading || !input.trim() || exhausted ? 0.45 : 1 }}
+                style={{ ...styles.sendBtn, opacity: loading || !input.trim() || exhausted ? 0.4 : 1 }}
                 className="send-btn"
                 onClick={() => handleSend()}
                 disabled={loading || !input.trim() || exhausted}
               >
-                {loading ? <span className="spinner" /> : <span>Send ↑</span>}
+                {loading ? <span className="spinner" /> : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
               </button>
             </div>
             <div style={styles.inputHint}>
@@ -488,9 +481,8 @@ const styles = {
   /* Header */
   header: {
     display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "14px 24px", background: "var(--glass)", backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)", borderBottom: "1px solid var(--glass-border)",
-    zIndex: 10,
+    padding: "13px 24px", background: "var(--bg-1)",
+    borderBottom: "1px solid var(--border)", zIndex: 10,
   },
   brand: { display: "flex", alignItems: "center", gap: 12 },
   logoWrap: { position: "relative", width: 40, height: 40, flexShrink: 0 },
@@ -539,9 +531,8 @@ const styles = {
 
   /* Sidebar */
   sidebar: {
-    width: 270, flexShrink: 0, padding: "16px 12px",
-    background: "var(--glass)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-    borderRight: "1px solid var(--glass-border)", overflowY: "auto",
+    width: 268, flexShrink: 0, padding: "16px 12px",
+    background: "var(--bg-1)", borderRight: "1px solid var(--border)", overflowY: "auto",
     display: "flex", flexDirection: "column", gap: 6,
   },
   newChatBtn: {
@@ -622,41 +613,64 @@ const styles = {
 
   /* Chat area */
   chatArea: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" },
-  messageList: { flex: 1, overflowY: "auto", padding: "32px 10% 16px" },
+  messageList: { flex: 1, overflowY: "auto", padding: "0 10% 16px" },
 
-  /* Empty state */
+  /* Empty state — Arcade-style hero */
   emptyState: {
-    position: "relative", display: "flex", flexDirection: "column", alignItems: "center",
-    justifyContent: "center", minHeight: "100%", textAlign: "center", padding: "20px",
-    animation: "fadeUp 0.5s var(--ease)",
+    display: "flex", flexDirection: "column", minHeight: "100%",
+    animation: "fadeUp 0.4s var(--ease)",
   },
-  emptyGlow: { display: "none" },
-  emptyBadge: {
-    fontSize: 11.5, fontWeight: 600, color: "var(--blue)", padding: "5px 14px",
-    borderRadius: 99, border: "1px solid color-mix(in srgb, var(--blue) 25%, transparent)",
-    background: "color-mix(in srgb, var(--blue) 8%, transparent)", marginBottom: 20,
-    letterSpacing: "0.01em",
+
+  /* Blue gradient hero panel */
+  heroPanel: {
+    background: "linear-gradient(135deg, #EAF0FF 0%, #C2D5FF 28%, #5580FF 60%, #1A3DD0 100%)",
+    padding: "52px 10% 48px", display: "flex", flexDirection: "column", alignItems: "center",
+    textAlign: "center", borderRadius: "0 0 28px 28px",
   },
-  emptyTitle: { fontSize: 34, fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.15, marginBottom: 12, color: "var(--text-hi)" },
-  emptyText: { color: "var(--text-mid)", fontSize: 15, maxWidth: 460, lineHeight: 1.7, marginBottom: 32 },
-  tierLegend: { display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap", justifyContent: "center" },
+  heroBadge: {
+    display: "inline-block", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em",
+    textTransform: "uppercase", color: "rgba(255,255,255,0.85)",
+    background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.30)",
+    borderRadius: 99, padding: "5px 16px", marginBottom: 24,
+  },
+  heroTitle: {
+    fontSize: 44, fontWeight: 900, letterSpacing: "-0.035em", lineHeight: 1.1,
+    color: "#0B1020", marginBottom: 16,
+  },
+  heroEm: { color: "#FFFFFF", fontStyle: "normal" },
+  heroSub: {
+    fontSize: 15.5, color: "rgba(20, 30, 70, 0.75)", lineHeight: 1.7,
+    maxWidth: 420, marginBottom: 28,
+  },
+  heroDivider: { width: 40, height: 1, background: "rgba(255,255,255,0.35)", marginBottom: 24 },
+  heroFeatures: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" },
+  heroFeatureTag: {
+    fontSize: 12, fontWeight: 500, color: "rgba(20,30,70,0.80)",
+    background: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.45)",
+    borderRadius: 99, padding: "5px 14px",
+  },
+
+  /* Tier cards section */
+  tierSection: { padding: "36px 10% 28px", display: "flex", flexDirection: "column", alignItems: "center" },
+  tierSectionLabel: {
+    fontSize: 11, fontWeight: 700, color: "var(--text-lo)", textTransform: "uppercase",
+    letterSpacing: "0.1em", marginBottom: 18,
+  },
+  tierLegend: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, width: "100%", maxWidth: 560 },
   tierCard: {
-    position: "relative",
     display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 5,
-    padding: "18px 20px", background: "var(--bg-1)",
-    border: "1px solid var(--border)", borderRadius: 16, minWidth: 158,
-    transition: "transform 0.22s var(--ease), box-shadow 0.22s var(--ease)",
+    padding: "16px 18px", background: "var(--bg-1)",
+    border: "1px solid var(--border)", borderRadius: 14,
+    transition: "transform 0.2s var(--ease), box-shadow 0.2s var(--ease)",
     boxShadow: "var(--shadow-sm)",
   },
-  tierLabel: { fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 99, letterSpacing: "0.04em", border: "1px solid", marginBottom: 4 },
-  tierName: { color: "var(--text-hi)", fontSize: 15, fontWeight: 700 },
-  tierModel: { color: "var(--text-lo)", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" },
-  tierRole: { color: "var(--text-mid)", fontSize: 11.5, marginTop: 4, maxWidth: 140, lineHeight: 1.45 },
-  featureRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", maxWidth: 460 },
-  featureChip: {
-    fontSize: 12, fontWeight: 600, color: "var(--text-mid)", padding: "7px 14px",
-    borderRadius: 99, background: "var(--bg-2)", border: "1px solid var(--border)",
+  tierLabel: {
+    fontSize: 10.5, fontWeight: 700, padding: "3px 10px", borderRadius: 99,
+    letterSpacing: "0.05em", border: "1px solid", marginBottom: 6,
   },
+  tierName: { color: "var(--text-hi)", fontSize: 14, fontWeight: 700, lineHeight: 1.3 },
+  tierModel: { color: "var(--text-lo)", fontSize: 10.5, fontFamily: "'JetBrains Mono', monospace" },
+  tierRole: { color: "var(--text-mid)", fontSize: 12, marginTop: 6, lineHeight: 1.5 },
 
   /* Typing */
   typingWrap: { display: "flex", alignItems: "flex-end", gap: 12, marginBottom: 20, animation: "fadeUp 0.3s var(--ease)" },
@@ -673,22 +687,23 @@ const styles = {
   },
 
   /* Input */
-  inputZone: { padding: "12px 8% 16px", background: "linear-gradient(transparent, var(--bg-0) 40%)" },
+  inputZone: { padding: "10px 10% 16px" },
   inputBar: {
-    display: "flex", gap: 10, padding: "8px 8px 8px 18px", borderRadius: 16,
+    display: "flex", alignItems: "center", gap: 8, padding: "8px 8px 8px 20px", borderRadius: 99,
     background: "var(--bg-1)", border: "1px solid var(--border)",
-    transition: "all 0.25s var(--ease)", boxShadow: "var(--shadow-sm)",
+    transition: "border-color 0.2s var(--ease), box-shadow 0.2s var(--ease)",
+    boxShadow: "var(--shadow-sm)",
   },
-  inputBarDisabled: { opacity: 0.6 },
+  inputBarDisabled: { opacity: 0.55 },
   input: {
     flex: 1, background: "none", border: "none", color: "var(--text-hi)",
-    fontSize: 14.5, outline: "none", fontFamily: "inherit",
+    fontSize: 15, outline: "none", fontFamily: "inherit", padding: "4px 0",
   },
   sendBtn: {
     display: "flex", alignItems: "center", justifyContent: "center",
-    background: "var(--grad-primary)", color: "var(--on-primary)", border: "none", borderRadius: 11,
-    padding: "11px 22px", fontWeight: 700, fontSize: 14, cursor: "pointer",
-    transition: "all 0.2s var(--ease)", boxShadow: "0 4px 14px rgba(45, 91, 255, 0.28)", minWidth: 92,
+    background: "var(--grad-primary)", color: "var(--on-primary)", border: "none",
+    borderRadius: "50%", width: 40, height: 40, flexShrink: 0, cursor: "pointer",
+    transition: "all 0.2s var(--ease)", boxShadow: "0 3px 10px rgba(45, 91, 255, 0.32)",
   },
   inputHint: { textAlign: "center", fontSize: 11, color: "var(--text-dim)", marginTop: 9 },
 
@@ -709,9 +724,9 @@ const styles = {
     .dev-btn:hover { border-color: var(--border); color: var(--text-hi); background: var(--bg-4); }
     .tier-card { animation: popIn 0.45s var(--ease-spring) backwards; }
     .tier-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-    .input-bar:focus-within { border-color: color-mix(in srgb, var(--blue) 50%, transparent); box-shadow: 0 0 0 3px rgba(45,91,255,0.10), var(--shadow-md); }
-    .send-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 6px 18px rgba(45,91,255,0.38); }
-    .send-btn:active:not(:disabled) { transform: translateY(0); }
+    .input-bar:focus-within { border-color: rgba(45,91,255,0.45); box-shadow: 0 0 0 3px rgba(45,91,255,0.09); }
+    .send-btn:hover:not(:disabled) { transform: scale(1.07); box-shadow: 0 5px 16px rgba(45,91,255,0.42); }
+    .send-btn:active:not(:disabled) { transform: scale(0.97); }
     .toast-in { animation: popIn 0.3s var(--ease-spring); }
 
     .typing-dot {
