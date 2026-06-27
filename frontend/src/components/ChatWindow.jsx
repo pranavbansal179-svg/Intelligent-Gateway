@@ -16,6 +16,7 @@ function makeChat() {
     requestLog: [],
     actualTotal: 0,
     naiveTotal: 0,
+    queryCount: 0,
   };
 }
 
@@ -121,6 +122,7 @@ export default function ChatWindow() {
         },
       };
 
+      const naiveCost = data.naive_cost ?? data.call_cost ?? 0; // fallback: naive = actual if field missing
       setChats((prev) =>
         prev.map((c) => {
           if (c.id !== chatId) return c;
@@ -129,7 +131,8 @@ export default function ChatWindow() {
             messages: [...c.messages, assistantMsg],
             budget: { spent: BUDGET_CAP - data.budget_remaining, state: data.budget_state },
             actualTotal: (c.actualTotal || 0) + (data.call_cost || 0),
-            naiveTotal: (c.naiveTotal || 0) + (data.naive_cost || 0),
+            naiveTotal: (c.naiveTotal || 0) + naiveCost,
+            queryCount: (c.queryCount || 0) + 1,
           };
         })
       );
@@ -242,6 +245,7 @@ export default function ChatWindow() {
           <SavingsPanel
             actualTotal={activeChat.actualTotal || 0}
             naiveTotal={activeChat.naiveTotal || 0}
+            queryCount={activeChat.queryCount || 0}
           />
 
           {/* Demo prompts */}
