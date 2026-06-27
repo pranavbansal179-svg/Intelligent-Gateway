@@ -4,7 +4,7 @@ import BudgetBar from "./BudgetBar";
 import MessageBubble from "./MessageBubble";
 import SavingsPanel from "./SavingsPanel";
 
-const BUDGET_CAP = 2.0;
+const BUDGET_CAP = 0.01;
 const IS_DEV = import.meta.env.DEV;
 
 function makeChat() {
@@ -30,9 +30,9 @@ const DEMO_PROMPTS = [
 
 const DEV_BUDGET_STATES = [
   { label: "Reset (Full)", spent: 0 },
-  { label: "Economy (60% used)", spent: 1.2 },
-  { label: "Warning (93% used)", spent: 1.87 },
-  { label: "Exhausted", spent: 2.0 },
+  { label: "Economy (60% used)", spent: 0.006 },
+  { label: "Warning (93% used)", spent: 0.0093 },
+  { label: "Exhausted", spent: 0.01 },
 ];
 
 export default function ChatWindow() {

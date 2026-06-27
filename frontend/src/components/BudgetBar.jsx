@@ -14,24 +14,28 @@ const STATE_LABELS = {
 /**
  * @param {{ spent: number, cap: number, state: "FULL"|"ECONOMY"|"WARNING"|"EXHAUSTED" }} props
  */
-export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL" }) {
+export default function BudgetBar({ spent = 0, cap = 0.01, state = "FULL" }) {
   const remaining = Math.max(0, cap - spent);
-  const pct = Math.min(100, (remaining / cap) * 100);
+  const pct = Math.min(100, (spent / cap) * 100); // fills up as you spend
   const color = STATE_COLORS[state] ?? STATE_COLORS.FULL;
 
   return (
     <div style={styles.wrapper}>
       <div style={styles.labelRow}>
         <span style={styles.label}>Budget</span>
-        <span style={styles.amount}>
-          <span style={{ color }}>${remaining.toFixed(2)}</span>
-          <span style={styles.muted}> / ${cap.toFixed(2)}</span>
-        </span>
         {state !== "FULL" && (
           <span style={{ ...styles.badge, background: color + "22", color }}>
             {STATE_LABELS[state]}
           </span>
         )}
+        <span style={styles.amounts}>
+          <span style={{ color, fontVariantNumeric: "tabular-nums" }}>
+            ${spent.toFixed(6)}
+          </span>
+          <span style={styles.muted}> spent · </span>
+          <span style={styles.muted}>${remaining.toFixed(6)} left</span>
+          <span style={styles.muted}> / ${cap.toFixed(2)}</span>
+        </span>
       </div>
       <div style={styles.track}>
         <div
@@ -65,20 +69,23 @@ const styles = {
     fontWeight: 600,
     letterSpacing: "0.05em",
     textTransform: "uppercase",
+    flexShrink: 0,
   },
-  amount: {
-    fontSize: 13,
-    fontWeight: 600,
-    marginLeft: "auto",
-  },
-  muted: { color: "#7D8590" },
   badge: {
     fontSize: 11,
     fontWeight: 700,
     padding: "2px 8px",
     borderRadius: 99,
     letterSpacing: "0.04em",
+    flexShrink: 0,
   },
+  amounts: {
+    fontSize: 12,
+    fontWeight: 600,
+    marginLeft: "auto",
+    fontVariantNumeric: "tabular-nums",
+  },
+  muted: { color: "#7D8590" },
   track: {
     height: 6,
     background: "#21262D",
