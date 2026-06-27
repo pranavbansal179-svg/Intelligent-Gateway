@@ -187,16 +187,19 @@ export default function ChatWindow() {
       {/* ── Header ── */}
       <header style={styles.header}>
         <div style={styles.brand}>
-          <div style={styles.logoMark}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="url(#lg)" strokeWidth="1.8" strokeLinejoin="round" />
-              <path d="M12 7l4.5 2.5v5L12 17l-4.5-2.5v-5L12 7z" fill="url(#lg)" opacity="0.85" />
-              <defs>
-                <linearGradient id="lg" x1="3" y1="2" x2="21" y2="22">
-                  <stop stopColor="#00E5AC" /><stop offset="0.5" stopColor="#4DABFF" /><stop offset="1" stopColor="#B197FC" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <div style={styles.logoWrap}>
+            <span style={styles.logoRing} />
+            <div style={styles.logoMark}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="url(#lg)" strokeWidth="1.8" strokeLinejoin="round" />
+                <path d="M12 7l4.5 2.5v5L12 17l-4.5-2.5v-5L12 7z" fill="url(#lg)" opacity="0.9" />
+                <defs>
+                  <linearGradient id="lg" x1="3" y1="2" x2="21" y2="22">
+                    <stop stopColor="#00E5AC" /><stop offset="0.5" stopColor="#4DABFF" /><stop offset="1" stopColor="#B197FC" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
           </div>
           <div>
             <div style={styles.brandName}>
@@ -235,8 +238,9 @@ export default function ChatWindow() {
 
       <div style={styles.body}>
         {/* ── Sidebar ── */}
-        <aside style={styles.sidebar}>
+        <aside style={styles.sidebar} className="sidebar">
           <button style={styles.newChatBtn} className="newchat-btn" onClick={handleNewChat}>
+            <span className="sheen-layer" />
             <span style={styles.newChatPlus}>+</span> New conversation
           </button>
 
@@ -352,7 +356,7 @@ export default function ChatWindow() {
         </aside>
 
         {/* ── Chat area ── */}
-        <main style={styles.chatArea}>
+        <main style={styles.chatArea} className="dot-grid">
           <div style={styles.messageList}>
             {activeChat.messages.length === 0 && (
               <div style={styles.emptyState}>
@@ -367,15 +371,21 @@ export default function ChatWindow() {
                 </p>
                 <div style={styles.tierLegend}>
                   {[
-                    { tier: "T1", label: "Simple", desc: "Qwen3-30B", color: "var(--t1)", icon: "◆" },
-                    { tier: "T2", label: "Moderate", desc: "Llama-3.3-70B", color: "var(--t2)", icon: "◆◆" },
-                    { tier: "T3", label: "Complex", desc: "Hermes-4-70B", color: "var(--t3)", icon: "◆◆◆" },
-                  ].map(({ tier, label, desc, color, icon }) => (
-                    <div key={tier} style={styles.tierCard} className="tier-card">
+                    { tier: "T1", label: "Simple", desc: "Qwen3-30B", color: "var(--t1)", icon: "◆", role: "Definitions & quick facts" },
+                    { tier: "T2", label: "Moderate", desc: "Llama-3.3-70B", color: "var(--t2)", icon: "◆◆", role: "Trade-offs & comparisons" },
+                    { tier: "T3", label: "Complex", desc: "Hermes-4-70B", color: "var(--t3)", icon: "◆◆◆", role: "Full financial plans" },
+                  ].map(({ tier, label, desc, color, icon, role }, i) => (
+                    <div
+                      key={tier}
+                      style={{ ...styles.tierCard, animationDelay: `${0.15 + i * 0.1}s` }}
+                      className="tier-card"
+                    >
+                      <span style={{ ...styles.tierTopline, background: `linear-gradient(90deg, transparent, ${color}, transparent)` }} />
                       <span style={{ ...styles.tierGlyph, color }}>{icon}</span>
-                      <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 14%, transparent)` }}>{tier}</span>
+                      <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 16%, transparent)`, borderColor: `color-mix(in srgb, ${color} 35%, transparent)` }}>{tier}</span>
                       <span style={styles.tierName}>{label}</span>
                       <span style={styles.tierModel}>{desc}</span>
+                      <span style={styles.tierRole}>{role}</span>
                     </div>
                   ))}
                 </div>
@@ -466,12 +476,17 @@ const styles = {
     zIndex: 10,
   },
   brand: { display: "flex", alignItems: "center", gap: 12 },
+  logoWrap: { position: "relative", width: 40, height: 40, flexShrink: 0 },
+  logoRing: {
+    position: "absolute", inset: -2, borderRadius: 13,
+    background: "conic-gradient(from 0deg, #00E5AC, #4DABFF, #B197FC, #00E5AC)",
+    filter: "blur(3px)", opacity: 0.75, animation: "spinSlow 5s linear infinite",
+  },
   logoMark: {
-    width: 40, height: 40, borderRadius: 12,
-    background: "linear-gradient(135deg, rgba(0,229,172,0.15), rgba(132,94,247,0.15))",
+    position: "relative", width: 40, height: 40, borderRadius: 12,
+    background: "linear-gradient(135deg, rgba(10,14,20,0.95), rgba(18,22,32,0.95))",
     border: "1px solid var(--glass-border-hi)",
     display: "flex", alignItems: "center", justifyContent: "center",
-    boxShadow: "var(--glow-teal)",
   },
   brandName: { display: "flex", alignItems: "baseline", gap: 8 },
   logoText: { fontWeight: 900, fontSize: 20, letterSpacing: "-0.02em" },
@@ -513,10 +528,12 @@ const styles = {
     display: "flex", flexDirection: "column", gap: 6,
   },
   newChatBtn: {
+    position: "relative", overflow: "hidden",
     display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-    width: "100%", padding: "11px", marginBottom: 6, borderRadius: 12, border: "none",
+    width: "100%", padding: "12px", marginBottom: 6, borderRadius: 12, border: "none",
     background: "var(--grad-primary)", color: "#04110C", fontWeight: 800, fontSize: 13.5,
     cursor: "pointer", boxShadow: "var(--glow-teal)", transition: "all 0.22s var(--ease)",
+    flexShrink: 0,
   },
   newChatPlus: { fontSize: 17, fontWeight: 700, lineHeight: 1 },
   sectionLabel: {
@@ -610,15 +627,18 @@ const styles = {
   emptyText: { color: "var(--text-mid)", fontSize: 15, maxWidth: 480, lineHeight: 1.6, marginBottom: 30 },
   tierLegend: { display: "flex", gap: 14, marginBottom: 26, flexWrap: "wrap", justifyContent: "center" },
   tierCard: {
-    display: "flex", flexDirection: "column", alignItems: "center", gap: 7,
-    padding: "18px 24px", background: "var(--glass)", backdropFilter: "blur(12px)",
+    position: "relative", overflow: "hidden",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+    padding: "20px 22px 18px", background: "var(--glass)", backdropFilter: "blur(12px)",
     WebkitBackdropFilter: "blur(12px)", border: "1px solid var(--glass-border)",
-    borderRadius: 16, minWidth: 124, transition: "all 0.25s var(--ease)",
+    borderRadius: 18, minWidth: 150, transition: "transform 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease)",
   },
+  tierTopline: { position: "absolute", top: 0, left: 0, right: 0, height: 2 },
   tierGlyph: { fontSize: 13, letterSpacing: 2 },
-  tierLabel: { fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 99, letterSpacing: "0.05em" },
-  tierName: { color: "var(--text-hi)", fontSize: 14, fontWeight: 700 },
+  tierLabel: { fontSize: 11, fontWeight: 800, padding: "3px 11px", borderRadius: 99, letterSpacing: "0.05em", border: "1px solid" },
+  tierName: { color: "var(--text-hi)", fontSize: 15, fontWeight: 800, marginTop: 2 },
   tierModel: { color: "var(--text-lo)", fontSize: 11, fontFamily: "'JetBrains Mono', monospace" },
+  tierRole: { color: "var(--text-dim)", fontSize: 10.5, marginTop: 4, maxWidth: 130, lineHeight: 1.3 },
   featureRow: { display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", maxWidth: 460 },
   featureChip: {
     fontSize: 12, fontWeight: 600, color: "var(--text-mid)", padding: "7px 14px",
@@ -662,6 +682,9 @@ const styles = {
 
   /* CSS injected block */
   css: `
+    /* Sidebar children must keep natural height so the sidebar scrolls */
+    .sidebar > * { flex-shrink: 0; }
+
     .hover-lift:hover { transform: translateY(-1px); border-color: var(--glass-border-hi); color: var(--text-hi); }
     .newchat-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,229,172,0.35); filter: brightness(1.05); }
     .newchat-btn:active { transform: translateY(0); }
@@ -672,7 +695,8 @@ const styles = {
     .demo-btn:hover:not(:disabled) { border-color: var(--glass-border-hi); background: var(--bg-3); transform: translateX(2px); }
     .demo-btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .dev-btn:hover { border-color: var(--glass-border-hi); color: var(--text-hi); background: var(--bg-4); }
-    .tier-card:hover { transform: translateY(-4px); border-color: var(--glass-border-hi); box-shadow: var(--shadow-md); }
+    .tier-card { animation: popIn 0.55s var(--ease-spring) backwards; }
+    .tier-card:hover { transform: translateY(-6px) scale(1.02); border-color: var(--glass-border-hi); box-shadow: var(--shadow-lg), var(--glow-teal); }
     .input-bar:focus-within { border-color: color-mix(in srgb, var(--teal) 50%, transparent); box-shadow: 0 0 0 3px rgba(0,229,172,0.1), var(--shadow-md); }
     .send-btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); box-shadow: 0 6px 20px rgba(0,229,172,0.4); }
     .send-btn:active:not(:disabled) { transform: translateY(0); }

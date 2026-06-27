@@ -155,6 +155,54 @@ body::after {
 
 .msg-in { animation: fadeUp 0.4s var(--ease); }
 
+/* Rotating conic ring around the logo */
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+@keyframes sheen {
+  0% { transform: translateX(-130%) skewX(-18deg); }
+  60%, 100% { transform: translateX(260%) skewX(-18deg); }
+}
+@keyframes borderFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes pulseDot {
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Dot-grid texture overlay for depth */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+
+/* Sweeping sheen highlight (use on a positioned overflow:hidden parent) */
+.sheen-layer {
+  position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none;
+}
+.sheen-layer::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+  animation: sheen 4.5s var(--ease) infinite;
+}
+
+/* Animated gradient border wrapper */
+.grad-border {
+  position: relative;
+  background:
+    linear-gradient(var(--bg-1), var(--bg-1)) padding-box,
+    linear-gradient(120deg, var(--teal), var(--blue), var(--violet), var(--teal)) border-box;
+  background-size: 100% 100%, 250% 100%;
+  border: 1px solid transparent;
+  animation: borderFlow 6s linear infinite;
+}
+
+.float { animation: floatY 5s ease-in-out infinite; }
+
 .grad-text {
   background: var(--grad-logo);
   background-size: 200% auto;
