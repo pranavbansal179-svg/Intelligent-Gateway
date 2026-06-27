@@ -55,19 +55,21 @@ COMPLEX_MARKERS = [
     "wealth",
 ]
 
-# Single-trade-off signal words
+# Single-trade-off signal words — personal decision language only.
+# "difference between" is intentionally excluded: it signals a definition
+# request, not a personal decision, so Tier 1 handles it fine.
 TRADEOFF_MARKERS = [
     "should i",
     "better option",
-    "compare",
     "versus",
     "vs",
     "trade-off",
     "tradeoff",
     "pros and cons",
-    "difference between",
     "which is better",
     "or should",
+    "which should i",
+    "what should i choose",
 ]
 
 # Regex to count dollar amounts / numeric constraints
