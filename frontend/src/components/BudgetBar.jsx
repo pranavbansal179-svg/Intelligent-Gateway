@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
 
-const STATE_COLORS = {
-  FULL: "#00C896",
-  ECONOMY: "#F0C040",
-  WARNING: "#F0A500",
-  EXHAUSTED: "#DA3633",
-};
-
-const STATE_LABELS = {
-  ECONOMY: "Economy mode",
-  WARNING: "Low budget",
-  EXHAUSTED: "Exhausted",
+const STATE_META = {
+  FULL: { color: "var(--teal)", label: null },
+  ECONOMY: { color: "var(--gold)", label: "Economy mode" },
+  WARNING: { color: "var(--amber)", label: "Low budget" },
+  EXHAUSTED: { color: "var(--rose)", label: "Exhausted" },
 };
 
 /**
@@ -18,10 +12,10 @@ const STATE_LABELS = {
  */
 export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCallCost = 0 }) {
   const remaining = Math.max(0, cap - spent);
-  const pct = Math.min(100, (spent / cap) * 100); // fills left→right as budget consumed
-  const color = STATE_COLORS[state] ?? STATE_COLORS.FULL;
+  const pct = Math.min(100, (spent / cap) * 100);
+  const meta = STATE_META[state] ?? STATE_META.FULL;
+  const color = meta.color;
 
-  // Flash the last-query cost for 3 seconds after each new call
   const [flashCost, setFlashCost] = useState(null);
   useEffect(() => {
     if (lastCallCost > 0) {
@@ -33,27 +27,28 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
 
   return (
     <div style={styles.wrapper}>
-      <div style={styles.labelRow}>
-        <span style={styles.label}>Budget</span>
+      <div style={styles.row}>
+        <span style={styles.label}>Session budget</span>
 
-        {state !== "FULL" && (
-          <span style={{ ...styles.badge, background: color + "22", color }}>
-            {STATE_LABELS[state]}
+        {meta.label && (
+          <span style={{ ...styles.badge, color, background: `color-mix(in srgb, ${color} 16%, transparent)`, borderColor: `color-mix(in srgb, ${color} 35%, transparent)` }}>
+            {meta.label}
           </span>
         )}
 
         {flashCost && (
-          <span style={styles.flashCost}>
+          <span key={flashCost} style={styles.flash} className="budget-flash">
             −${flashCost.toFixed(6)} this query
           </span>
         )}
 
         <span style={styles.amounts}>
-          <span style={{ color: "#7D8590" }}>$</span>
-          <span style={{ color, fontVariantNumeric: "tabular-nums" }}>
-            {spent.toFixed(6)}
-          </span>
-          <span style={styles.muted}> spent · ${remaining.toFixed(6)} left / ${cap.toFixed(2)}</span>
+          <span style={{ color, fontWeight: 800 }}>${spent.toFixed(6)}</span>
+          <span style={styles.muted}> spent</span>
+          <span style={styles.sep}>·</span>
+          <span style={styles.muted}>${remaining.toFixed(6)} left</span>
+          <span style={styles.sep}>/</span>
+          <span style={styles.cap}>${cap.toFixed(2)}</span>
         </span>
       </div>
 
@@ -62,72 +57,57 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
           style={{
             ...styles.fill,
             width: `${pct}%`,
-            background: color,
-            transition: "width 0.5s ease, background 0.3s ease",
-            minWidth: pct > 0 ? 3 : 0, // always show a sliver once any money is spent
+            minWidth: pct > 0 ? 4 : 0,
+            background: `linear-gradient(90deg, color-mix(in srgb, ${color} 60%, transparent), ${color})`,
+            boxShadow: `0 0 12px color-mix(in srgb, ${color} 50%, transparent)`,
           }}
         />
       </div>
+
+      <style>{`
+        @keyframes budgetFlash {
+          0% { opacity: 0; transform: translateY(-3px) scale(0.96); }
+          12% { opacity: 1; transform: translateY(0) scale(1); }
+          80% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .budget-flash { animation: budgetFlash 3s var(--ease) forwards; }
+      `}</style>
     </div>
   );
 }
 
 const styles = {
   wrapper: {
-    padding: "10px 16px",
-    background: "#161B22",
-    borderBottom: "1px solid #21262D",
+    padding: "9px 24px 11px", background: "var(--glass)", backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid var(--glass-border)", zIndex: 9,
   },
-  labelRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 6,
-    flexWrap: "wrap",
-  },
+  row: { display: "flex", alignItems: "center", gap: 9, marginBottom: 7, flexWrap: "wrap" },
   label: {
-    fontSize: 12,
-    color: "#7D8590",
-    fontWeight: 600,
-    letterSpacing: "0.05em",
-    textTransform: "uppercase",
-    flexShrink: 0,
+    fontSize: 11, color: "var(--text-lo)", fontWeight: 700,
+    letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0,
   },
   badge: {
-    fontSize: 11,
-    fontWeight: 700,
-    padding: "2px 8px",
-    borderRadius: 99,
-    letterSpacing: "0.04em",
-    flexShrink: 0,
+    fontSize: 10.5, fontWeight: 800, padding: "2px 10px", borderRadius: 99,
+    border: "1px solid", letterSpacing: "0.03em", flexShrink: 0,
   },
-  flashCost: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: "#F0A500",
-    background: "#F0A50018",
-    border: "1px solid #F0A50040",
-    borderRadius: 99,
-    padding: "1px 8px",
-    fontVariantNumeric: "tabular-nums",
-    animation: "fadeIn 0.2s ease",
+  flash: {
+    fontSize: 10.5, fontWeight: 800, color: "var(--amber)",
+    background: "color-mix(in srgb, var(--amber) 14%, transparent)",
+    border: "1px solid color-mix(in srgb, var(--amber) 35%, transparent)",
+    borderRadius: 99, padding: "2px 10px", fontFamily: "'JetBrains Mono', monospace",
   },
   amounts: {
-    fontSize: 12,
-    fontWeight: 600,
-    marginLeft: "auto",
-    fontVariantNumeric: "tabular-nums",
-    whiteSpace: "nowrap",
+    fontSize: 12, fontWeight: 600, marginLeft: "auto",
+    fontFamily: "'JetBrains Mono', monospace", whiteSpace: "nowrap",
+    display: "flex", alignItems: "center", gap: 4,
   },
-  muted: { color: "#7D8590", fontWeight: 400 },
+  muted: { color: "var(--text-lo)", fontWeight: 500 },
+  sep: { color: "var(--text-dim)" },
+  cap: { color: "var(--text-mid)", fontWeight: 700 },
   track: {
-    height: 6,
-    background: "#21262D",
-    borderRadius: 99,
-    overflow: "hidden",
+    height: 7, background: "var(--bg-3)", borderRadius: 99, overflow: "hidden",
+    border: "1px solid var(--border-soft)",
   },
-  fill: {
-    height: "100%",
-    borderRadius: 99,
-  },
+  fill: { height: "100%", borderRadius: 99, transition: "width 0.6s var(--ease)" },
 };

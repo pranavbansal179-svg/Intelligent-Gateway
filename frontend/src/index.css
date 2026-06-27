@@ -1,20 +1,173 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  /* Surfaces */
+  --bg-0: #07080C;
+  --bg-1: #0C0E14;
+  --bg-2: #12141C;
+  --bg-3: #181B26;
+  --bg-4: #21252F;
+
+  /* Glass */
+  --glass: rgba(20, 23, 32, 0.6);
+  --glass-hi: rgba(28, 32, 44, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-border-hi: rgba(255, 255, 255, 0.12);
+
+  /* Text */
+  --text-hi: #F2F5FC;
+  --text-mid: #A4AEC4;
+  --text-lo: #6E768C;
+  --text-dim: #424A5C;
+
+  /* Borders */
+  --border: #20242F;
+  --border-soft: #181B24;
+
+  /* Accents */
+  --teal: #00E5AC;
+  --teal-deep: #00B98C;
+  --teal-glow: rgba(0, 229, 172, 0.35);
+  --violet: #B197FC;
+  --violet-deep: #845EF7;
+  --violet-glow: rgba(177, 151, 252, 0.32);
+  --blue: #4DABFF;
+  --amber: #FFC04D;
+  --gold: #F5C04E;
+  --rose: #FF6B7A;
+  --rose-glow: rgba(255, 107, 122, 0.3);
+
+  /* Tier colors */
+  --t1: #00E5AC;
+  --t2: #F5C04E;
+  --t3: #FF8A4D;
+
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, #00E5AC 0%, #00B0FF 100%);
+  --grad-violet: linear-gradient(135deg, #B197FC 0%, #6E5CF7 100%);
+  --grad-warm: linear-gradient(135deg, #FFC04D 0%, #FF6B7A 100%);
+  --grad-logo: linear-gradient(120deg, #00E5AC 0%, #4DABFF 45%, #B197FC 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --glow-teal: 0 0 24px rgba(0, 229, 172, 0.25);
+  --glow-violet: 0 0 24px rgba(177, 151, 252, 0.25);
+
+  /* Motion */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  background: #0D0F14;
-  color: #E6EDF3;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  height: 100vh;
+html, body {
+  height: 100%;
+  background: var(--bg-0);
+  color: var(--text-hi);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   overflow: hidden;
 }
 
-#root {
-  height: 100vh;
+#root { height: 100vh; position: relative; z-index: 1; }
+
+/* ============================================================
+   ANIMATED MESH BACKGROUND
+   ============================================================ */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+  z-index: 0;
+  pointer-events: none;
+}
+body::before {
+  width: 55vw; height: 55vw;
+  top: -18vw; left: -12vw;
+  background: radial-gradient(circle, rgba(0, 229, 172, 0.28), transparent 70%);
+  animation: drift1 22s ease-in-out infinite;
+}
+body::after {
+  width: 50vw; height: 50vw;
+  bottom: -16vw; right: -10vw;
+  background: radial-gradient(circle, rgba(132, 94, 247, 0.26), transparent 70%);
+  animation: drift2 26s ease-in-out infinite;
+}
+@keyframes drift1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8vw, 6vw) scale(1.12); }
+}
+@keyframes drift2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-7vw, -5vw) scale(1.1); }
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0D0F14; }
-::-webkit-scrollbar-thumb { background: #21262D; border-radius: 99px; }
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--bg-4), var(--bg-3));
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--teal-deep); background-clip: padding-box; }
 
-input:focus { border-color: #00C896 !important; }
-button:focus-visible { outline: 2px solid #00C896; outline-offset: 2px; }
+/* ============================================================
+   SHARED ANIMATIONS / UTILITIES
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--teal-glow); }
+  50% { box-shadow: 0 0 18px 2px var(--teal-glow); }
+}
+@keyframes typing {
+  0%, 80%, 100% { transform: translateY(0) scale(0.85); opacity: 0.45; }
+  40% { transform: translateY(-6px) scale(1); opacity: 1; }
+}
+
+.msg-in { animation: fadeUp 0.4s var(--ease); }
+
+.grad-text {
+  background: var(--grad-logo);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+input:focus, textarea:focus { outline: none; }
+button { font-family: inherit; }
+button:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, body::before, body::after { animation: none !important; }
+}
