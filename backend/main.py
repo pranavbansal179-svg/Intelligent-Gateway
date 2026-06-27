@@ -65,8 +65,12 @@ _MODEL_PRICING: dict[str, tuple[float, float]] = {
 }
 _DEFAULT_PRICING = (0.13, 0.40)  # fallback for unknown models
 
-_session_spend: dict[str, float] = {}  # session_id → cumulative $ spent
-_session_history: dict[str, list[dict]] = {}  # session_id → conversation history
+_session_spend: dict[str, float] = {}        # session_id → cumulative actual $ spent
+_session_naive_spend: dict[str, float] = {}  # session_id → cumulative naive $ (always Tier 3)
+_session_history: dict[str, list[dict]] = {} # session_id → conversation history
+
+# Tier 3 pricing is the "naive" baseline — what you'd pay without smart routing
+_NAIVE_PRICING = _MODEL_PRICING["mzai:NousResearch/Hermes-4-70B"]  # (0.13, 0.40)
 
 # ---------------------------------------------------------------------------
 # Dev-only: in-memory budget override (for demo/testing)
@@ -131,10 +135,10 @@ def _get_spent(session_id: str) -> float:
     return _session_spend.get(session_id, 0.0)
 
 
-def _record_call_cost(session_id: str, model: str, response: dict) -> float:
+def _record_call_cost(session_id: str, model: str, response: dict) -> tuple[float, float]:
     """
-    Extract token counts from the completion response, calculate cost,
-    add to the session's running total, and return the per-call cost.
+    Extract token counts, calculate actual cost and naive (Tier 3) cost.
+    Returns (call_cost, naive_cost).
     """
     usage = response.get("usage") or {}
     prompt_tokens = usage.get("prompt_tokens", 0) or 0
@@ -143,13 +147,19 @@ def _record_call_cost(session_id: str, model: str, response: dict) -> float:
     input_price, output_price = _MODEL_PRICING.get(model, _DEFAULT_PRICING)
     call_cost = (prompt_tokens * input_price + completion_tokens * output_price) / 1_000_000
 
+    naive_in, naive_out = _NAIVE_PRICING
+    naive_cost = (prompt_tokens * naive_in + completion_tokens * naive_out) / 1_000_000
+
     _session_spend[session_id] = _session_spend.get(session_id, 0.0) + call_cost
+    _session_naive_spend[session_id] = _session_naive_spend.get(session_id, 0.0) + naive_cost
+
     logger.info(
-        "COST | session=%s | model=%s | prompt=%d tok | completion=%d tok | cost=$%.6f | total=$%.4f",
-        session_id, model, prompt_tokens, completion_tokens, call_cost,
-        _session_spend[session_id],
+        "COST | session=%s | model=%s | prompt=%d tok | completion=%d tok | "
+        "actual=$%.6f | naive=$%.6f | saved=$%.6f | session_total=$%.4f",
+        session_id, model, prompt_tokens, completion_tokens,
+        call_cost, naive_cost, naive_cost - call_cost, _session_spend[session_id],
     )
-    return call_cost
+    return call_cost, naive_cost
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +211,9 @@ async def chat(request: ChatRequest):
             model="none",
             routing_reason="injection_detected_by_regex",
             call_cost=0.0,
+            naive_cost=0.0,
+            saved=0.0,
+            session_saved=max(0.0, _session_naive_spend.get(session_id, 0.0) - _get_spent(session_id)),
             budget_remaining=budget_manager.get_remaining(spent),
             budget_state=budget_manager.get_state(spent).value,
             injection_blocked=True,
@@ -278,14 +291,15 @@ async def chat(request: ChatRequest):
     # ------------------------------------------------------------------
     # 6. Record cost from token counts, update running session total
     # ------------------------------------------------------------------
-    call_cost = _record_call_cost(session_id, model, raw_response)
+    call_cost, naive_cost = _record_call_cost(session_id, model, raw_response)
     post_spend = _get_spent(session_id)
     remaining = budget_manager.get_remaining(post_spend)
     final_state = budget_manager.get_state(post_spend)
+    session_saved = _session_naive_spend.get(session_id, 0.0) - post_spend
 
     logger.info(
-        "CALL COMPLETE | session=%s | model=%s | cost=$%.6f | remaining=$%.4f | state=%s",
-        session_id, model, call_cost, remaining, final_state.value,
+        "CALL COMPLETE | session=%s | model=%s | cost=$%.6f | remaining=$%.4f | state=%s | session_saved=$%.6f",
+        session_id, model, call_cost, remaining, final_state.value, session_saved,
     )
 
     return ChatResponse(
@@ -293,6 +307,9 @@ async def chat(request: ChatRequest):
         model=model,
         routing_reason=routing_reason,
         call_cost=call_cost,
+        naive_cost=naive_cost,
+        saved=max(0.0, naive_cost - call_cost),
+        session_saved=max(0.0, session_saved),
         budget_remaining=remaining,
         budget_state=final_state.value,
         injection_blocked=False,

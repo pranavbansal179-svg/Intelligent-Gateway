@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { clearHistory, devSetBudgetState, sendChat } from "../api";
 import BudgetBar from "./BudgetBar";
 import MessageBubble from "./MessageBubble";
+import SavingsPanel from "./SavingsPanel";
 
 const BUDGET_CAP = 2.0;
 const IS_DEV = import.meta.env.DEV;
@@ -13,6 +14,8 @@ function makeChat() {
     messages: [],
     budget: { spent: 0, state: "FULL" },
     requestLog: [],
+    actualTotal: 0,
+    naiveTotal: 0,
   };
 }
 
@@ -125,6 +128,8 @@ export default function ChatWindow() {
             ...c,
             messages: [...c.messages, assistantMsg],
             budget: { spent: BUDGET_CAP - data.budget_remaining, state: data.budget_state },
+            actualTotal: (c.actualTotal || 0) + (data.call_cost || 0),
+            naiveTotal: (c.naiveTotal || 0) + (data.naive_cost || 0),
           };
         })
       );
@@ -232,6 +237,12 @@ export default function ChatWindow() {
               </div>
             ))}
           </div>
+
+          {/* ROI / Savings tracker */}
+          <SavingsPanel
+            actualTotal={activeChat.actualTotal || 0}
+            naiveTotal={activeChat.naiveTotal || 0}
+          />
 
           {/* Demo prompts */}
           <div style={styles.panel}>
