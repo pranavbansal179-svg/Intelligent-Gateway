@@ -37,6 +37,27 @@ const DEV_BUDGET_STATES = [
 
 const TIER_DOT = { "1": "var(--t1)", "2": "var(--t2)", "3": "var(--t3)", x: "var(--rose)" };
 
+const TIER_CARDS = [
+  {
+    tier: "T1", label: "Simple questions", desc: "Qwen3-30B", color: "var(--t1)",
+    role: "Definitions, quick facts, basic math",
+    example: "What is the difference between a Roth IRA and a traditional IRA?",
+    exampleShort: "What's a Roth IRA?",
+  },
+  {
+    tier: "T2", label: "Moderate analysis", desc: "Llama-3.3-70B", color: "var(--t2)",
+    role: "Trade-offs, comparisons, budgeting",
+    example: "I have $8,000 saved — should I pay off my credit card debt at 22% APR or keep it as an emergency fund?",
+    exampleShort: "Debt vs emergency fund?",
+  },
+  {
+    tier: "T3", label: "Complex planning", desc: "Hermes-4-70B", color: "var(--t3)",
+    role: "Full financial plans, multi-step strategies",
+    example: "$40k saved, $15k in credit card debt at 22% APR, buying a house in 3 years with a $95k salary — what should my full financial plan look like?",
+    exampleShort: "Build me a financial plan",
+  },
+];
+
 export default function ChatWindow() {
   const [chats, setChats] = useState(() => [makeChat()]);
   const [activeChatId, setActiveChatId] = useState(() => chats[0].id);
@@ -45,6 +66,7 @@ export default function ChatWindow() {
   const [toast, setToast] = useState(null);
   const [logOpen, setLogOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(true);
+  const [hoveredTier, setHoveredTier] = useState(null);
   const bottomRef = useRef(null);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? chats[0];
@@ -389,22 +411,53 @@ export default function ChatWindow() {
                 <div style={styles.tierSection}>
                   <p style={styles.tierSectionLabel}>How routing works</p>
                   <div style={styles.tierLegend}>
-                    {[
-                      { tier: "T1", label: "Simple questions", desc: "Qwen3-30B", color: "var(--t1)", role: "Definitions, quick facts, basic math" },
-                      { tier: "T2", label: "Moderate analysis", desc: "Llama-3.3-70B", color: "var(--t2)", role: "Trade-offs, comparisons, budgeting" },
-                      { tier: "T3", label: "Complex planning", desc: "Hermes-4-70B", color: "var(--t3)", role: "Full financial plans, multi-step strategies" },
-                    ].map(({ tier, label, desc, color, role }, i) => (
-                      <div
-                        key={tier}
-                        style={{ ...styles.tierCard, animationDelay: `${0.1 + i * 0.08}s`, borderLeft: `3px solid ${color}` }}
-                        className="tier-card"
-                      >
-                        <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 12%, transparent)`, borderColor: `color-mix(in srgb, ${color} 28%, transparent)` }}>{tier}</span>
-                        <span style={styles.tierName}>{label}</span>
-                        <span style={styles.tierModel}>{desc}</span>
-                        <span style={styles.tierRole}>{role}</span>
-                      </div>
-                    ))}
+                    {TIER_CARDS.map(({ tier, label, desc, color, role, example, exampleShort }, i) => {
+                      const hovered = hoveredTier === tier;
+                      return (
+                        <div
+                          key={tier}
+                          style={{
+                            ...styles.tierCard,
+                            animationDelay: `${0.1 + i * 0.08}s`,
+                            borderLeft: `3px solid ${color}`,
+                            cursor: "pointer",
+                            transform: hovered ? "translateY(-5px)" : "none",
+                            boxShadow: hovered ? `0 12px 28px color-mix(in srgb, ${color} 18%, rgba(20,30,70,0.10))` : "var(--shadow-sm)",
+                            borderColor: hovered ? `color-mix(in srgb, ${color} 35%, var(--border))` : "var(--border)",
+                            transition: "transform 0.22s var(--ease), box-shadow 0.22s var(--ease), border-color 0.22s var(--ease)",
+                          }}
+                          className="tier-card"
+                          onMouseEnter={() => setHoveredTier(tier)}
+                          onMouseLeave={() => setHoveredTier(null)}
+                          onClick={() => handleSend(example)}
+                        >
+                          <span style={{ ...styles.tierLabel, color, background: `color-mix(in srgb, ${color} 12%, transparent)`, borderColor: `color-mix(in srgb, ${color} 28%, transparent)` }}>{tier}</span>
+                          <span style={styles.tierName}>{label}</span>
+                          <span style={styles.tierModel}>{desc}</span>
+                          <span style={styles.tierRole}>{role}</span>
+
+                          {/* Always-visible example hint */}
+                          <div style={{
+                            ...styles.exampleHint,
+                            borderColor: `color-mix(in srgb, ${color} 22%, transparent)`,
+                            background: `color-mix(in srgb, ${color} 6%, transparent)`,
+                          }}>
+                            <span style={{ ...styles.exampleHintQuote, color }}>❝</span>
+                            <span style={styles.exampleHintText}>{exampleShort}</span>
+                          </div>
+
+                          {/* Hover CTA */}
+                          <div style={{
+                            ...styles.tryBtn,
+                            background: color,
+                            opacity: hovered ? 1 : 0,
+                            transform: hovered ? "translateY(0)" : "translateY(4px)",
+                          }}>
+                            Try this prompt ↑
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -680,6 +733,19 @@ const styles = {
   tierName: { color: "var(--text-hi)", fontSize: 14, fontWeight: 700, lineHeight: 1.3 },
   tierModel: { color: "var(--text-lo)", fontSize: 10.5, fontFamily: "'JetBrains Mono', monospace" },
   tierRole: { color: "var(--text-mid)", fontSize: 12, marginTop: 6, lineHeight: 1.5 },
+  exampleHint: {
+    display: "flex", alignItems: "flex-start", gap: 5,
+    marginTop: 10, padding: "7px 10px", borderRadius: 8,
+    border: "1px solid", transition: "all 0.2s var(--ease)",
+  },
+  exampleHintQuote: { fontSize: 14, fontWeight: 900, lineHeight: 1, flexShrink: 0, marginTop: 1 },
+  exampleHintText: { fontSize: 11, color: "var(--text-mid)", lineHeight: 1.45, fontStyle: "italic" },
+  tryBtn: {
+    marginTop: 8, padding: "6px 12px", borderRadius: 8, border: "none",
+    color: "#fff", fontSize: 11, fontWeight: 700, textAlign: "center",
+    transition: "opacity 0.18s var(--ease), transform 0.18s var(--ease)",
+    pointerEvents: "none",
+  },
 
   /* Typing */
   typingWrap: { display: "flex", alignItems: "flex-end", gap: 12, marginBottom: 20, animation: "fadeUp 0.3s var(--ease)" },
@@ -732,7 +798,6 @@ const styles = {
     .demo-btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .dev-btn:hover { border-color: var(--border); color: var(--text-hi); background: var(--bg-4); }
     .tier-card { animation: popIn 0.45s var(--ease-spring) backwards; }
-    .tier-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
     .input-bar:focus-within { border-color: rgba(45,91,255,0.45); box-shadow: 0 0 0 3px rgba(45,91,255,0.09); }
     .send-btn:hover:not(:disabled) { transform: scale(1.07); box-shadow: 0 5px 16px rgba(45,91,255,0.42); }
     .send-btn:active:not(:disabled) { transform: scale(0.97); }
