@@ -1,3 +1,5 @@
+import asyncio
+import json as _json
 import logging
 import os
 import time
@@ -6,6 +8,7 @@ from typing import Any
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 load_dotenv()
 
@@ -438,6 +441,36 @@ async def chat(request: ChatRequest):
         optimized_tokens=opt["optimized_tokens"],
         latency_ms=latency,
         pipeline_trace=trace,
+    )
+
+
+@app.post("/chat/stream")
+async def chat_stream(request: ChatRequest):
+    """
+    SSE version of /chat.
+    Runs the exact same pipeline, then streams the answer token-by-token so
+    the frontend can render a live typing effect.
+    Events:
+      data: {"type": "token", "text": "<chunk>"}   — repeated
+      data: {"type": "done",  <full ChatResponse fields>}
+    """
+    # Re-use the full pipeline — HTTPException propagates normally (402, 502, …)
+    response_obj = await chat(request)
+    answer = response_obj.answer
+    meta = response_obj.model_dump()
+
+    async def generate():
+        chunk_size = 4
+        for i in range(0, len(answer), chunk_size):
+            chunk = answer[i:i + chunk_size]
+            yield f"data: {_json.dumps({'type': 'token', 'text': chunk})}\n\n"
+            await asyncio.sleep(0.012)
+        yield f"data: {_json.dumps({'type': 'done', **meta})}\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 

@@ -70,7 +70,7 @@ function inline(text) {
 /**
  * @param {{ role: "user"|"assistant", content: string, metadata?: object, blocked?: boolean }} props
  */
-export default function MessageBubble({ role, content, metadata, blocked }) {
+export default function MessageBubble({ role, content, metadata, blocked, isStreaming }) {
   const isUser = role === "user";
 
   return (
@@ -100,10 +100,17 @@ export default function MessageBubble({ role, content, metadata, blocked }) {
             </div>
           )}
           <div style={isUser ? styles.contentUser : styles.content}>
-            {isUser ? content : renderContent(content)}
+            {isUser ? content : (
+              <>
+                {content ? renderContent(content) : (
+                  isStreaming && <span style={{ color: "var(--text-dim)" }}>Thinking…</span>
+                )}
+                {isStreaming && <span className="stream-cursor" />}
+              </>
+            )}
           </div>
         </div>
-        {!isUser && metadata && !blocked && (
+        {!isUser && metadata && !blocked && !isStreaming && (
           <MetadataChip
             model={metadata.model}
             reason={metadata.reason}

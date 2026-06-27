@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { clearHistory, devSetBudgetState, sendChat } from "../api";
+import { clearHistory, devSetBudgetState, streamChat } from "../api";
 import BudgetBar from "./BudgetBar";
 import MessageBubble from "./MessageBubble";
 import SavingsPanel from "./SavingsPanel";
@@ -165,6 +165,8 @@ export default function ChatWindow() {
   const [selectedFeature, setSelectedFeature] = useState(null);
   const [scenarioGoal, setScenarioGoal] = useState("save");
   const [scenarioIncome, setScenarioIncome] = useState("50-80k");
+  const [savingsFlash, setSavingsFlash] = useState(false);
+  const prevSavingsRef = useRef(0);
   const bottomRef = useRef(null);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? chats[0];
@@ -176,6 +178,16 @@ export default function ChatWindow() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeChat.messages]);
+
+  const sessionSavedComputed = Math.max(0, (activeChat.naiveTotal || 0) - (activeChat.actualTotal || 0));
+  useEffect(() => {
+    if (sessionSavedComputed > prevSavingsRef.current + 0.000001) {
+      setSavingsFlash(true);
+      const t = setTimeout(() => setSavingsFlash(false), 1800);
+      prevSavingsRef.current = sessionSavedComputed;
+      return () => clearTimeout(t);
+    }
+  }, [sessionSavedComputed]);
 
   function showToast(msg, type = "warning") {
     setToast({ msg, type });
@@ -210,12 +222,23 @@ export default function ChatWindow() {
     setLoading(true);
 
     const chatId = activeChat.id;
-    const userMsg = { role: "user", content: text, id: Date.now() };
     const isFirstMsg = activeChat.messages.length === 0;
-    updateChat(chatId, {
-      messages: [...activeChat.messages, userMsg],
-      ...(isFirstMsg ? { title: text.slice(0, 36) + (text.length > 36 ? "…" : "") } : {}),
-    });
+    const userMsgId = Date.now();
+    const assistantMsgId = Date.now() + 1;
+
+    // Add user message + streaming placeholder together
+    setChats((prev) => prev.map((c) => {
+      if (c.id !== chatId) return c;
+      return {
+        ...c,
+        messages: [
+          ...c.messages,
+          { role: "user", content: text, id: userMsgId },
+          { role: "assistant", content: "", id: assistantMsgId, isStreaming: true },
+        ],
+        ...(isFirstMsg ? { title: text.slice(0, 36) + (text.length > 36 ? "…" : "") } : {}),
+      };
+    }));
 
     const logEntry = {
       ts: new Date().toLocaleTimeString(),
@@ -223,71 +246,91 @@ export default function ChatWindow() {
       tier: "—", model: "—", cost: "—", blocked: false, cached: false,
     };
 
-    try {
-      const data = await sendChat(text, chatId);
+    const requestLogRef = activeChat.requestLog;
 
-      const assistantMsg = {
-        role: "assistant",
-        content: data.answer,
-        id: Date.now() + 1,
-        blocked: data.injection_blocked,
-        metadata: data.injection_blocked ? null : {
-          model: data.model,
-          reason: data.routing_reason,
-          cost: data.call_cost,
-          cacheHit: data.cache_hit ?? false,
-          wasOptimized: data.was_optimized ?? false,
-          originalTokens: data.original_tokens ?? 0,
-          optimizedTokens: data.optimized_tokens ?? 0,
-          latencyMs: data.latency_ms ?? 0,
-          pipelineTrace: data.pipeline_trace ?? [],
-        },
-      };
-
-      const naiveCost = data.naive_cost ?? data.call_cost ?? 0;
-      setChats((prev) =>
-        prev.map((c) => {
+    await streamChat(text, chatId, {
+      onToken: (chunk) => {
+        setChats((prev) => prev.map((c) => {
           if (c.id !== chatId) return c;
           return {
             ...c,
-            messages: [...c.messages, assistantMsg],
+            messages: c.messages.map((m) =>
+              m.id === assistantMsgId ? { ...m, content: m.content + chunk } : m
+            ),
+          };
+        }));
+      },
+      onDone: (data) => {
+        const naiveCost = data.naive_cost ?? data.call_cost ?? 0;
+        setChats((prev) => prev.map((c) => {
+          if (c.id !== chatId) return c;
+          return {
+            ...c,
+            messages: c.messages.map((m) =>
+              m.id === assistantMsgId ? {
+                ...m,
+                isStreaming: false,
+                content: m.content || data.answer,
+                blocked: data.injection_blocked,
+                metadata: data.injection_blocked ? null : {
+                  model: data.model,
+                  reason: data.routing_reason,
+                  cost: data.call_cost,
+                  cacheHit: data.cache_hit ?? false,
+                  wasOptimized: data.was_optimized ?? false,
+                  originalTokens: data.original_tokens ?? 0,
+                  optimizedTokens: data.optimized_tokens ?? 0,
+                  latencyMs: data.latency_ms ?? 0,
+                  pipelineTrace: data.pipeline_trace ?? [],
+                },
+              } : m
+            ),
             budget: { spent: BUDGET_CAP - data.budget_remaining, state: data.budget_state },
             lastCallCost: data.call_cost || 0,
             actualTotal: (c.actualTotal || 0) + (data.call_cost || 0),
             naiveTotal: (c.naiveTotal || 0) + naiveCost,
             queryCount: (c.queryCount || 0) + 1,
+            requestLog: [
+              { ...logEntry,
+                cached: data.cache_hit ?? false,
+                tier: data.routing_reason?.match(/Tier (\d)/i)?.[1] ?? "—",
+                model: data.model,
+                cost: data.cache_hit ? "$0.0000" : `$${(data.call_cost || 0).toFixed(4)}`,
+                blocked: data.injection_blocked,
+              },
+              ...requestLogRef,
+            ].slice(0, 50),
           };
-        })
-      );
+        }));
 
-      logEntry.cached = data.cache_hit ?? false;
-      logEntry.tier = data.routing_reason.match(/Tier (\d)/i)?.[1] ?? "—";
-      logEntry.model = data.model;
-      logEntry.cost = data.cache_hit ? "$0.0000" : `$${data.call_cost.toFixed(4)}`;
-      logEntry.blocked = data.injection_blocked;
-
-      if (data.budget_state === "WARNING") {
-        showToast(`Budget low — $${data.budget_remaining.toFixed(2)} remaining`, "warning");
-      } else if (data.budget_state === "EXHAUSTED") {
-        showToast("Budget exhausted — no more calls can be made", "danger");
-      }
-    } catch (err) {
-      const fallbackMsg = {
-        role: "assistant",
-        id: Date.now() + 1,
-        content: err.code === "budget_exhausted"
-          ? err.message
-          : `Backend error: ${(err.message || "Unknown error").slice(0, 120)}`,
-      };
-      setChats((prev) =>
-        prev.map((c) => c.id !== chatId ? c : { ...c, messages: [...c.messages, fallbackMsg] })
-      );
-      showToast(err.code === "budget_exhausted" ? "Budget exhausted" : `Error: ${(err.message || "").slice(0, 80)}`, "danger");
-      console.error("Chat error:", err);
-    } finally {
-      setLoading(false);
-      updateChat(chatId, { requestLog: [logEntry, ...activeChat.requestLog].slice(0, 50) });
-    }
+        if (data.budget_state === "WARNING") {
+          showToast(`Budget low — $${data.budget_remaining.toFixed(2)} remaining`, "warning");
+        } else if (data.budget_state === "EXHAUSTED") {
+          showToast("Budget exhausted — no more calls can be made", "danger");
+        }
+        setLoading(false);
+      },
+      onError: (err) => {
+        setChats((prev) => prev.map((c) => {
+          if (c.id !== chatId) return c;
+          return {
+            ...c,
+            messages: c.messages.map((m) =>
+              m.id === assistantMsgId ? {
+                ...m,
+                isStreaming: false,
+                content: err.code === "budget_exhausted"
+                  ? err.message
+                  : `Backend error: ${(err.message || "Unknown error").slice(0, 120)}`,
+              } : m
+            ),
+          };
+        }));
+        showToast(err.code === "budget_exhausted" ? "Budget exhausted" : `Error: ${(err.message || "").slice(0, 80)}`, "danger");
+        console.error("Chat error:", err);
+        setLoading(false);
+      },
+    });
   }
 
   async function handleDevBudget(spent) {
@@ -301,7 +344,7 @@ export default function ChatWindow() {
     }
   }
 
-  const sessionSaved = Math.max(0, (activeChat.naiveTotal || 0) - (activeChat.actualTotal || 0));
+  const sessionSaved = sessionSavedComputed;
   const exhausted = activeChat.budget.state === "EXHAUSTED";
 
   return (
@@ -337,9 +380,20 @@ export default function ChatWindow() {
             <span style={styles.statPillLabel}>Queries</span>
             <span style={styles.statPillValue}>{activeChat.queryCount}</span>
           </div>
-          <div style={{ ...styles.statPill, ...styles.statPillTeal }}>
-            <span style={styles.statPillLabel}>Saved</span>
-            <span style={{ ...styles.statPillValue, color: "var(--teal)" }}>${sessionSaved.toFixed(5)}</span>
+          <div
+            className="savings-pill"
+            style={{
+              ...styles.statPill,
+              ...styles.statPillTeal,
+              ...(savingsFlash ? styles.statPillFlash : {}),
+              transition: "box-shadow 0.3s var(--ease), background 0.3s var(--ease), transform 0.3s var(--ease)",
+            }}
+          >
+            <span style={styles.statPillLabel}>SAVED</span>
+            <span style={{ ...styles.statPillValue, color: "var(--teal)", fontSize: 15, fontWeight: 800 }}>
+              ${sessionSaved.toFixed(5)}
+            </span>
+            {savingsFlash && <span style={styles.savingsBadge}>↑</span>}
           </div>
           <button style={styles.ghostBtn} className="hover-lift" onClick={() => setLogOpen((o) => !o)}>
             {logOpen ? "Hide log" : "Show log"}
@@ -656,9 +710,10 @@ export default function ChatWindow() {
                   content={msg.content}
                   metadata={msg.metadata}
                   blocked={msg.blocked}
+                  isStreaming={msg.isStreaming ?? false}
                 />
               ))}
-              {loading && (
+              {loading && !activeChat.messages.some(m => m.isStreaming) && (
                 <div style={styles.typingWrap}>
                   <div style={styles.typingAvatar}>O</div>
                   <div style={styles.typingIndicator}>
@@ -755,6 +810,16 @@ const styles = {
     border: "1px solid var(--border)",
   },
   statPillTeal: { borderColor: "color-mix(in srgb, var(--teal) 30%, transparent)" },
+  statPillFlash: {
+    background: "color-mix(in srgb, var(--teal) 12%, var(--bg-1))",
+    boxShadow: "0 0 0 3px color-mix(in srgb, var(--teal) 22%, transparent), 0 4px 16px rgba(0,169,130,0.22)",
+    transform: "scale(1.04)",
+  },
+  savingsBadge: {
+    fontSize: 11, fontWeight: 800, color: "var(--teal)",
+    animation: "savingsPop 0.4s var(--ease-spring)",
+    display: "inline-block",
+  },
   statPillLabel: { fontSize: 9, color: "var(--text-lo)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 },
   statPillValue: { fontSize: 14, fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" },
   ghostBtn: {
@@ -1050,6 +1115,9 @@ const styles = {
     .scenario-send-btn:active:not(:disabled) { transform: translateY(0); }
     .scenario-send-btn:disabled { opacity: 0.45; cursor: not-allowed; }
     .toast-in { animation: popIn 0.3s var(--ease-spring); }
+    @keyframes savingsPop { 0% { transform: translateY(3px); opacity: 0; } 60% { transform: translateY(-2px); opacity: 1; } 100% { transform: translateY(0); opacity: 1; } }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .stream-cursor { display: inline-block; width: 2px; height: 1em; background: var(--blue); margin-left: 2px; vertical-align: text-bottom; animation: blink 0.9s step-start infinite; border-radius: 1px; }
 
     .typing-dot {
       width: 7px; height: 7px; border-radius: 50%;
