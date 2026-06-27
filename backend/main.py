@@ -234,143 +234,182 @@ async def chat(request: ChatRequest):
     def _elapsed_ms() -> int:
         return max(1, round((time.perf_counter() - started) * 1000))
 
+    def _step_ms(t: float) -> int:
+        return max(1, round((time.perf_counter() - t) * 1000))
+
+    trace: list[dict] = []
+
     # ------------------------------------------------------------------
     # 1. Guardrail — free regex pass (no API cost, instant)
     # ------------------------------------------------------------------
+    t = time.perf_counter()
     is_safe, matched_pattern = guardrail.quick_check(message)
+    g_ms = _step_ms(t)
+
     if not is_safe:
         logger.info("BLOCKED by quick_check | session=%s | pattern=%s", session_id, matched_pattern)
+        trace.append({"step": "guardrail", "label": "Injection Guard", "decision": "blocked",
+                       "detail": "Prompt injection attempt detected — request terminated", "ms": g_ms})
         spent = _get_spent(session_id)
         return ChatResponse(
             answer=REFUSAL_MESSAGE,
             model="none",
             routing_reason="injection_detected_by_regex",
-            call_cost=0.0,
-            naive_cost=0.0,
-            saved=0.0,
+            call_cost=0.0, naive_cost=0.0, saved=0.0,
             session_saved=max(0.0, _session_naive_spend.get(session_id, 0.0) - _get_spent(session_id)),
             budget_remaining=budget_manager.get_remaining(spent),
             budget_state=budget_manager.get_state(spent).value,
             injection_blocked=True,
             latency_ms=_elapsed_ms(),
+            pipeline_trace=trace,
         )
+
+    trace.append({"step": "guardrail", "label": "Injection Guard", "decision": "passed",
+                   "detail": "No prompt injection detected — forwarded to pipeline", "ms": g_ms})
 
     # ------------------------------------------------------------------
     # 2. Semantic cache lookup — free, instant, $0 cost
     # ------------------------------------------------------------------
+    t = time.perf_counter()
     cached = semantic_cache.lookup(message)
+    c_ms = _step_ms(t)
+
     if cached:
         spent = _get_spent(session_id)
         latency = _elapsed_ms()
-        logger.info(
-            "CACHE HIT | session=%s | %dms | similarity match for: %.60s",
-            session_id, latency, message,
-        )
+        logger.info("CACHE HIT | session=%s | %dms | similarity match for: %.60s", session_id, latency, message)
+        trace.append({"step": "cache", "label": "Semantic Cache", "decision": "hit",
+                       "detail": f"Similarity ≥ 0.87 match found — returning cached answer instantly", "ms": c_ms})
         return ChatResponse(
             answer=cached["answer"],
             model=cached["model"],
             routing_reason=cached["routing_reason"],
-            call_cost=0.0,
-            naive_cost=0.0,
-            saved=0.0,
+            call_cost=0.0, naive_cost=0.0, saved=0.0,
             session_saved=max(0.0, _session_naive_spend.get(session_id, 0.0) - _get_spent(session_id)),
             budget_remaining=budget_manager.get_remaining(spent),
             budget_state=budget_manager.get_state(spent).value,
             injection_blocked=False,
             latency_ms=latency,
             cache_hit=True,
+            pipeline_trace=trace,
         )
+
+    trace.append({"step": "cache", "label": "Semantic Cache", "decision": "miss",
+                   "detail": "No semantically similar question in cache — proceeding to LLM", "ms": c_ms})
 
     # ------------------------------------------------------------------
     # 3. Classify prompt
     # ------------------------------------------------------------------
+    t = time.perf_counter()
     classification = classifier.classify(message)
     requested_tier = classification["tier"]
     model = classification["model"]
     routing_reason = classification["reason"]
-    logger.info(
-        "CLASSIFY | session=%s | tier=%d | model=%s | reason=%s",
-        session_id, requested_tier, model, routing_reason,
-    )
+    cl_ms = _step_ms(t)
+    logger.info("CLASSIFY | session=%s | tier=%d | model=%s | reason=%s", session_id, requested_tier, model, routing_reason)
+
+    tier_labels = {1: "Qwen3-30B", 2: "Llama-3.3-70B", 3: "Hermes-4-70B"}
+    trace.append({"step": "classifier", "label": "Query Classifier", "decision": f"tier_{requested_tier}",
+                   "detail": f"Tier {requested_tier} — {routing_reason.split('—')[0].strip()} → {tier_labels.get(requested_tier, 'Unknown')}", "ms": cl_ms})
 
     # ------------------------------------------------------------------
     # 4. Budget check — pre-call spend
     # ------------------------------------------------------------------
-
+    t = time.perf_counter()
     pre_spend = _get_spent(session_id)
     state = budget_manager.get_state(pre_spend)
 
     try:
         actual_tier, downgrade_reason = budget_manager.enforce_tier(requested_tier, state)
     except BudgetExhaustedError as exc:
-        raise HTTPException(
-            status_code=402,
-            detail={"error": "budget_exhausted", "message": exc.message},
-        )
+        b_ms = _step_ms(t)
+        trace.append({"step": "budget", "label": "Budget Guard", "decision": "blocked",
+                       "detail": "Session budget exhausted — request terminated", "ms": b_ms})
+        raise HTTPException(status_code=402, detail={"error": "budget_exhausted", "message": exc.message})
+
+    b_ms = _step_ms(t)
+    remaining_pre = budget_manager.get_remaining(pre_spend)
 
     if downgrade_reason:
         routing_reason = f"{routing_reason} | {downgrade_reason}"
         from .classifier import MODEL_TIER1, MODEL_TIER2, MODEL_TIER3
         model = {1: MODEL_TIER1, 2: MODEL_TIER2, 3: MODEL_TIER3}[actual_tier]
         logger.info("BUDGET DOWNGRADE | session=%s | %s", session_id, downgrade_reason)
+        trace.append({"step": "budget", "label": "Budget Guard", "decision": "downgraded",
+                       "detail": f"Downgraded T{requested_tier}→T{actual_tier} — budget in {state.value} state · ${remaining_pre:.4f} left", "ms": b_ms})
+    else:
+        trace.append({"step": "budget", "label": "Budget Guard", "decision": "approved",
+                       "detail": f"${remaining_pre:.4f} remaining · {state.value} — approved at Tier {actual_tier}", "ms": b_ms})
 
     # ------------------------------------------------------------------
     # 5. Prompt optimization — use Tier 1 to compress verbose Tier 2/3 prompts
-    #    before sending to the (more expensive) target model.
     # ------------------------------------------------------------------
+    t = time.perf_counter()
     opt = await optimize_prompt(message, actual_tier, client)
     effective_message = opt["optimized"]
+    o_ms = _step_ms(t)
+
+    if opt["was_optimized"]:
+        pct = round((1 - opt["optimized_tokens"] / opt["original_tokens"]) * 100) if opt["original_tokens"] > 0 else 0
+        trace.append({"step": "optimizer", "label": "Prompt Optimizer", "decision": "compressed",
+                       "detail": f"Compressed {opt['original_tokens']}→{opt['optimized_tokens']} tokens (−{pct}%) before sending to LLM", "ms": o_ms})
+    else:
+        trace.append({"step": "optimizer", "label": "Prompt Optimizer", "decision": "skipped",
+                       "detail": f"Prompt is {opt.get('original_tokens', 0)} tokens — short enough to send as-is", "ms": o_ms})
 
     # ------------------------------------------------------------------
-    # 6. Model call
-    #    If the user is asking about a stock price, prepend live market data
-    #    so the LLM answers with real numbers instead of stale training data.
-    #    Full conversation history is passed so the model has context.
+    # 6. Stock context injection
     # ------------------------------------------------------------------
+    t = time.perf_counter()
     stock_context = fetch_price_context(effective_message)
-    user_content = f"{stock_context}\n\nUser question: {effective_message}" if stock_context else effective_message
+    s_ms = _step_ms(t)
 
-    # Retrieve and update conversation history for this session
+    if stock_context:
+        ticker_hint = stock_context.split("\n")[0][:60] if stock_context else ""
+        trace.append({"step": "context", "label": "Stock Context", "decision": "injected",
+                       "detail": f"Live market data injected: {ticker_hint}", "ms": s_ms})
+        user_content = f"{stock_context}\n\nUser question: {effective_message}"
+    else:
+        trace.append({"step": "context", "label": "Stock Context", "decision": "skipped",
+                       "detail": "No stock ticker detected in prompt", "ms": s_ms})
+        user_content = effective_message
+
+    # ------------------------------------------------------------------
+    # 7. LLM generation
+    # ------------------------------------------------------------------
     history = _session_history.setdefault(session_id, [])
     history.append({"role": "user", "content": user_content})
-
-    # Keep last 20 turns (10 exchanges) to stay within context limits
     trimmed_history = history[-20:]
-
     messages = _build_system_messages(actual_tier) + trimmed_history
     max_tokens = 2048 if actual_tier == 3 else 1024
+
+    t = time.perf_counter()
     try:
         raw_response = await client.chat(
-            model=model,
-            messages=messages,
-            guardrail_profile=None,
-            max_tokens=max_tokens,
+            model=model, messages=messages, guardrail_profile=None, max_tokens=max_tokens,
         )
     except Exception as exc:
-        # Surface the real Otari error to the client for easier debugging
         logger.error("Otari API call failed | session=%s | model=%s | error=%s", session_id, model, exc)
-        # Remove the failed user message from history so it doesn't corrupt context
         history.pop()
         raise HTTPException(status_code=502, detail={"error": "otari_api_error", "message": str(exc)})
 
+    llm_ms = _step_ms(t)
     answer = _extract_answer(raw_response)
-
-    # Append assistant reply to history
     history.append({"role": "assistant", "content": answer})
 
+    model_label = tier_labels.get(actual_tier, model.split("/")[-1])
+    trace.append({"step": "llm", "label": "LLM Generation", "decision": "completed",
+                   "detail": f"{model_label} generated response in {llm_ms}ms", "ms": llm_ms})
+
     # ------------------------------------------------------------------
-    # 6. Record cost and populate semantic cache for future lookups
+    # Record cost + cache store
     # ------------------------------------------------------------------
     call_cost, naive_cost = _record_call_cost(
         session_id, model, raw_response, sent_messages=messages, answer=answer
     )
     semantic_cache.store(
-        query=message,
-        answer=answer,
-        model=model,
-        routing_reason=routing_reason,
-        call_cost=call_cost,
-        naive_cost=naive_cost,
+        query=message, answer=answer, model=model,
+        routing_reason=routing_reason, call_cost=call_cost, naive_cost=naive_cost,
     )
     post_spend = _get_spent(session_id)
     remaining = budget_manager.get_remaining(post_spend)
@@ -398,6 +437,7 @@ async def chat(request: ChatRequest):
         original_tokens=opt["original_tokens"],
         optimized_tokens=opt["optimized_tokens"],
         latency_ms=latency,
+        pipeline_trace=trace,
     )
 
 

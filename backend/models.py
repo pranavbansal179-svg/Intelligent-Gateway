@@ -23,6 +23,7 @@ class ChatResponse(BaseModel):
     original_tokens: int = 0
     optimized_tokens: int = 0
     latency_ms: int = 0
+    pipeline_trace: list[dict] = []
 
 
 class ClassifyResponse(BaseModel):

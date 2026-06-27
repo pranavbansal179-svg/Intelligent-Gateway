@@ -120,6 +120,7 @@ export default function ChatWindow() {
           originalTokens: data.original_tokens ?? 0,
           optimizedTokens: data.optimized_tokens ?? 0,
           latencyMs: data.latency_ms ?? 0,
+          pipelineTrace: data.pipeline_trace ?? [],
         },
       };
 
