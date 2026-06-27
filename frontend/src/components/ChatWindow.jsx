@@ -4,7 +4,7 @@ import BudgetBar from "./BudgetBar";
 import MessageBubble from "./MessageBubble";
 import SavingsPanel from "./SavingsPanel";
 
-const BUDGET_CAP = 0.01;
+const BUDGET_CAP = 2.0;
 const IS_DEV = import.meta.env.DEV;
 
 function makeChat() {
@@ -30,9 +30,9 @@ const DEMO_PROMPTS = [
 
 const DEV_BUDGET_STATES = [
   { label: "Reset (Full)", spent: 0 },
-  { label: "Economy (60% used)", spent: 0.006 },
-  { label: "Warning (93% used)", spent: 0.0093 },
-  { label: "Exhausted", spent: 0.01 },
+  { label: "Economy (60% used)", spent: 1.2 },
+  { label: "Warning (93% used)", spent: 1.87 },
+  { label: "Exhausted", spent: 2.0 },
 ];
 
 export default function ChatWindow() {
@@ -132,6 +132,7 @@ export default function ChatWindow() {
             ...c,
             messages: [...c.messages, assistantMsg],
             budget: { spent: BUDGET_CAP - data.budget_remaining, state: data.budget_state },
+            lastCallCost: data.call_cost || 0,
             actualTotal: (c.actualTotal || 0) + (data.call_cost || 0),
             naiveTotal: (c.naiveTotal || 0) + naiveCost,
             queryCount: (c.queryCount || 0) + 1,
@@ -196,7 +197,7 @@ export default function ChatWindow() {
       </div>
 
       {/* ── Budget bar ── */}
-      <BudgetBar spent={activeChat.budget.spent} cap={BUDGET_CAP} state={activeChat.budget.state} />
+      <BudgetBar spent={activeChat.budget.spent} cap={BUDGET_CAP} state={activeChat.budget.state} lastCallCost={activeChat.lastCallCost ?? 0} />
 
       {/* ── Toast ── */}
       {toast && (
@@ -395,6 +396,10 @@ export default function ChatWindow() {
       </div>
 
       <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         @keyframes bounce {
           0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
           40% { transform: translateY(-5px); opacity: 1; }
