@@ -1,14 +1,15 @@
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
 _MIN_WORDS_TO_OPTIMIZE = 12  # don't bother compressing short prompts
 
 _OPTIMIZER_SYSTEM = (
-    "You are a prompt optimizer for a finance AI assistant. "
-    "Rewrite the user's message as a concise, direct query that preserves ALL key information, "
-    "numbers, names, and intent. Remove only filler words, pleasantries, and redundancy. "
-    "Output ONLY the rewritten query — no explanation, no quotes, no prefix."
+    "You are a prompt compressor. "
+    "Rewrite the user message as a single concise sentence under 20 words. "
+    "Keep all numbers, names, and key facts. "
+    "Output ONLY the rewritten sentence. No explanation. No preamble."
 )
 
 
@@ -48,20 +49,20 @@ async def optimize_prompt(message: str, tier: int, client) -> dict:
             model=MODEL_TIER1,
             messages=[
                 {"role": "system", "content": _OPTIMIZER_SYSTEM},
-                # /no_think disables Qwen3 chain-of-thought so we get a direct rewrite
-                {"role": "user", "content": f"{message} /no_think"},
+                {"role": "user", "content": message},
             ],
-            max_tokens=256,
+            max_tokens=80,  # hard cap — forces a short output regardless of thinking mode
         )
         raw = response["choices"][0]["message"]["content"]
 
-        # Strip <think>...</think> blocks that Qwen3 may still emit
-        import re
-        compressed = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
+        # Strip any <think>...</think> blocks Qwen3 may emit
+        cleaned = re.sub(r"<think>.*?</think>", "", raw, flags=re.DOTALL).strip()
 
-        # Safety: if the model returned something clearly wrong, fall back
-        if not compressed or len(compressed) > len(message) * 1.5:
-            raise ValueError("Optimizer returned longer text — skipping")
+        # Take only the first non-empty line (ignore any trailing commentary)
+        compressed = next((ln.strip() for ln in cleaned.splitlines() if ln.strip()), "")
+
+        if not compressed:
+            raise ValueError("Optimizer returned empty response")
 
         optimized_tokens = _estimate_tokens(compressed)
         logger.info(
