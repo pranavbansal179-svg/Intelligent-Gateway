@@ -168,6 +168,8 @@ export default function ChatWindow() {
   const [savingsFlash, setSavingsFlash] = useState(false);
   const prevSavingsRef = useRef(0);
   const bottomRef = useRef(null);
+  const messageListRef = useRef(null);
+  const userScrolledUp = useRef(false);
 
   const activeChat = chats.find((c) => c.id === activeChatId) ?? chats[0];
 
@@ -176,8 +178,22 @@ export default function ChatWindow() {
   }
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!userScrolledUp.current) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [activeChat.messages]);
+
+  // Detect manual upward scroll so auto-scroll doesn't fight the user
+  useEffect(() => {
+    const el = messageListRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      userScrolledUp.current = distFromBottom > 80;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   const sessionSavedComputed = Math.max(0, (activeChat.naiveTotal || 0) - (activeChat.actualTotal || 0));
   useEffect(() => {
@@ -220,6 +236,7 @@ export default function ChatWindow() {
     if (!text || loading) return;
     setInput("");
     setLoading(true);
+    userScrolledUp.current = false; // re-engage auto-scroll for this response
 
     const chatId = activeChat.id;
     const isFirstMsg = activeChat.messages.length === 0;
@@ -549,7 +566,7 @@ export default function ChatWindow() {
 
         {/* ── Chat area ── */}
         <main style={styles.chatArea}>
-          <div style={styles.messageList}>
+          <div style={styles.messageList} ref={messageListRef}>
             {activeChat.messages.length === 0 && (
               <div style={styles.emptyState}>
                 {/* Arcade-style gradient hero panel */}
