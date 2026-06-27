@@ -90,7 +90,13 @@ export default function MessageBubble({ role, content, metadata, blocked }) {
         >
           {blocked && (
             <div style={styles.blockedHeader}>
-              <span style={styles.shield}>🛡</span> Blocked by injection guard
+              <span style={styles.shield}>🛡</span>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>Blocked by injection guard</div>
+                <div style={{ fontSize: 11.5, fontWeight: 400, color: "var(--text-mid)", marginTop: 2 }}>
+                  This message tried to override the assistant's instructions. The request was not sent to any LLM.
+                </div>
+              </div>
             </div>
           )}
           <div style={isUser ? styles.contentUser : styles.content}>

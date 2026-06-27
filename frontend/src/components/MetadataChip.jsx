@@ -4,25 +4,55 @@ const MODEL_LABELS = {
   "mzai:NousResearch/Hermes-4-70B": "Hermes-4-70B",
 };
 
-const TIER_COLORS = {
-  "1": "var(--t1)",
-  "2": "var(--t2)",
-  "3": "var(--t3)",
+const TIER_META = {
+  "1": {
+    color: "var(--t1)",
+    name: "Fast model",
+    why: "Classified as a simple question — routed to the fastest, cheapest model.",
+  },
+  "2": {
+    color: "var(--t2)",
+    name: "Mid-tier model",
+    why: "Moderate complexity detected — routed to a balanced model for better reasoning.",
+  },
+  "3": {
+    color: "var(--t3)",
+    name: "Frontier model",
+    why: "High complexity detected — escalated to the most capable model for detailed analysis.",
+  },
 };
 
-/**
- * @param {{ model: string, reason: string, cost: number, cacheHit?: boolean, wasOptimized?: boolean, originalTokens?: number, optimizedTokens?: number }} props
- */
-export default function MetadataChip({ model, reason, cost, cacheHit, wasOptimized, originalTokens, optimizedTokens, latencyMs }) {
+function fmt(ms) {
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
+}
+
+export default function MetadataChip({
+  model, reason, cost, cacheHit, wasOptimized,
+  originalTokens, optimizedTokens, latencyMs,
+}) {
+  /* ── CACHE HIT ── */
   if (cacheHit) {
+    const typicalMs = 3000;
+    const savedMs = latencyMs > 0 ? typicalMs - latencyMs : typicalMs;
     return (
       <div style={styles.root}>
-        <div style={styles.cacheBanner}>
-          <span style={styles.cacheIcon}>⚡</span>
-          <span style={styles.cacheLabel}>Cache hit</span>
-          <span style={styles.cacheText}>semantic match</span>
-          {latencyMs > 0 && <span style={styles.cacheSpeed}>served in {latencyMs}ms</span>}
-          <span style={styles.cacheCost}>$0.0000</span>
+        <div style={styles.card}>
+          <div style={styles.cardHeader}>
+            <span style={{ ...styles.iconPill, background: "color-mix(in srgb, var(--teal) 12%, transparent)", color: "var(--teal)", border: "1px solid color-mix(in srgb, var(--teal) 28%, transparent)" }}>
+              ⚡ Semantic cache
+            </span>
+            <span style={styles.headerRight}>
+              {latencyMs > 0 && <span style={styles.stat}>{fmt(latencyMs)}</span>}
+              <span style={{ ...styles.stat, color: "var(--teal)" }}>Free</span>
+            </span>
+          </div>
+          <p style={styles.cardTitle}>Answered instantly from cache</p>
+          <p style={styles.cardDesc}>
+            Your question matched a previous answer semantically — no LLM call was made.
+            {latencyMs > 0 && savedMs > 0 && (
+              <> Response served in <strong>{fmt(latencyMs)}</strong> instead of ~{fmt(typicalMs)} for a live call.</>
+            )}
+          </p>
         </div>
       </div>
     );
@@ -30,44 +60,81 @@ export default function MetadataChip({ model, reason, cost, cacheHit, wasOptimiz
 
   const label = MODEL_LABELS[model] ?? model.replace(/^mzai:/, "").split("/").pop();
   const tier = reason.match(/Tier (\d)/i)?.[1];
-  const tierColor = TIER_COLORS[tier] ?? "var(--teal)";
+  const tm = TIER_META[tier] ?? { color: "var(--teal)", name: "Model", why: reason };
+  const tierColor = tm.color;
+
   const savedPct = wasOptimized && originalTokens > 0
     ? Math.round((1 - optimizedTokens / originalTokens) * 100)
     : 0;
   const tokensSaved = (originalTokens ?? 0) - (optimizedTokens ?? 0);
+  const estCostSaved = tokensSaved > 0 ? (tokensSaved / 1000) * 0.0004 : 0;
 
   return (
     <div style={styles.root}>
-      <div style={styles.row}>
-        {tier && (
-          <span style={{ ...styles.tierBadge, color: tierColor, background: `color-mix(in srgb, ${tierColor} 16%, transparent)`, borderColor: `color-mix(in srgb, ${tierColor} 35%, transparent)` }}>
-            <span style={{ ...styles.tierDot, background: tierColor }} /> T{tier}
+      {/* ── ROUTING CARD ── */}
+      <div style={styles.card}>
+        <div style={styles.cardHeader}>
+          <span style={{
+            ...styles.iconPill,
+            background: `color-mix(in srgb, ${tierColor} 12%, transparent)`,
+            color: tierColor,
+            border: `1px solid color-mix(in srgb, ${tierColor} 28%, transparent)`,
+          }}>
+            <span style={{ ...styles.dot, background: tierColor }} />
+            T{tier} · {tm.name}
           </span>
-        )}
-        <span style={{ ...styles.chip, color: tierColor, background: `color-mix(in srgb, ${tierColor} 12%, transparent)` }}>{label}</span>
-        <span style={styles.reason}>{reason}</span>
-        <span style={styles.spacer} />
-        {latencyMs > 0 && <span style={styles.latency}>{latencyMs}ms</span>}
-        <span style={styles.cost}>${(cost ?? 0).toFixed(4)}</span>
+          <span style={styles.headerRight}>
+            {latencyMs > 0 && <span style={styles.stat}>{fmt(latencyMs)}</span>}
+            <span style={{ ...styles.stat, color: tierColor }}>${(cost ?? 0).toFixed(4)}</span>
+          </span>
+        </div>
+        <p style={styles.cardTitle}>
+          Routed to <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>{label}</span>
+        </p>
+        <p style={styles.cardDesc}>{tm.why}</p>
       </div>
 
+      {/* ── OPTIMIZER CARD ── */}
       {wasOptimized && savedPct > 0 && (
-        <div style={styles.optimizerBanner}>
-          <div style={styles.optimizerLeft}>
-            <span style={styles.optimizerIcon}>✦</span>
-            <span style={styles.optimizerLabel}>Prompt optimized</span>
+        <div style={{ ...styles.card, borderColor: "color-mix(in srgb, var(--violet) 28%, transparent)" }}>
+          <div style={styles.cardHeader}>
+            <span style={{
+              ...styles.iconPill,
+              background: "color-mix(in srgb, var(--violet) 10%, transparent)",
+              color: "var(--violet)",
+              border: "1px solid color-mix(in srgb, var(--violet) 25%, transparent)",
+            }}>
+              ✦ Prompt optimizer
+            </span>
+            <span style={styles.headerRight}>
+              <span style={{ ...styles.stat, color: "var(--violet)" }}>−{savedPct}% tokens</span>
+            </span>
           </div>
-          <div style={styles.optimizerStats}>
-            <span style={styles.statBlock}>
-              <span style={styles.statValue}>{originalTokens}</span>
-              <span style={styles.statUnit}>in</span>
-            </span>
-            <span style={styles.arrow}>→</span>
-            <span style={styles.statBlock}>
-              <span style={{ ...styles.statValue, color: "var(--violet)" }}>{optimizedTokens}</span>
-              <span style={styles.statUnit}>sent</span>
-            </span>
-            <span style={styles.savingsPill}>−{tokensSaved} tok · {savedPct}%</span>
+          <p style={styles.cardTitle}>Your prompt was compressed before sending</p>
+          <p style={styles.cardDesc}>
+            The router summarized your {originalTokens}-token prompt down to{" "}
+            <strong>{optimizedTokens} tokens</strong> — saving {tokensSaved} tokens without losing
+            the meaning of your question.
+            {estCostSaved > 0 && (
+              <> That's approximately <strong>${estCostSaved.toFixed(5)}</strong> saved on this call.</>
+            )}
+          </p>
+          <div style={styles.tokenBar}>
+            <div style={styles.tokenBarTrack}>
+              <div style={{
+                ...styles.tokenBarFill,
+                width: `${(optimizedTokens / originalTokens) * 100}%`,
+                background: `linear-gradient(90deg, var(--violet), color-mix(in srgb, var(--violet) 60%, transparent))`,
+              }} />
+            </div>
+            <div style={styles.tokenBarLabels}>
+              <span style={{ color: "var(--text-lo)", fontSize: 10.5 }}>
+                {optimizedTokens} sent
+              </span>
+              <span style={{ color: "var(--text-dim)", fontSize: 10.5 }}>
+                of {originalTokens} original
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -76,65 +143,41 @@ export default function MetadataChip({ model, reason, cost, cacheHit, wasOptimiz
 }
 
 const styles = {
-  root: { display: "flex", flexDirection: "column", gap: 6, marginTop: 8 },
-  row: { display: "flex", alignItems: "center", gap: 7, flexWrap: "wrap" },
-  tierBadge: {
-    display: "inline-flex", alignItems: "center", gap: 5, fontSize: 10.5, fontWeight: 800,
-    padding: "3px 9px", borderRadius: 99, border: "1px solid", letterSpacing: "0.04em",
+  root: { display: "flex", flexDirection: "column", gap: 6, marginTop: 10 },
+
+  card: {
+    padding: "11px 14px", borderRadius: 12,
+    background: "var(--bg-0)", border: "1px solid var(--border)",
+    display: "flex", flexDirection: "column", gap: 5,
   },
-  tierDot: { width: 5, height: 5, borderRadius: "50%", boxShadow: "0 0 6px currentColor" },
-  chip: {
-    fontSize: 11, padding: "3px 9px", borderRadius: 99, fontWeight: 700,
-    fontFamily: "'JetBrains Mono', monospace",
+  cardHeader: {
+    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8,
   },
-  reason: { fontSize: 11.5, color: "var(--text-lo)" },
-  spacer: { flex: 1 },
-  latency: {
-    fontSize: 10.5, fontWeight: 700, color: "var(--text-lo)",
-    fontFamily: "'JetBrains Mono', monospace",
-    background: "var(--bg-3)", borderRadius: 99, padding: "2px 8px",
+  iconPill: {
+    display: "inline-flex", alignItems: "center", gap: 5,
+    fontSize: 10.5, fontWeight: 700, padding: "3px 10px", borderRadius: 99,
+    letterSpacing: "0.02em",
   },
-  cost: {
-    fontSize: 11.5, fontWeight: 700, color: "var(--teal)",
+  dot: { width: 5, height: 5, borderRadius: "50%", flexShrink: 0 },
+  headerRight: { display: "flex", alignItems: "center", gap: 8 },
+  stat: {
+    fontSize: 11, fontWeight: 700, color: "var(--text-lo)",
     fontFamily: "'JetBrains Mono', monospace",
   },
 
-  /* Cache banner */
-  cacheBanner: {
-    display: "flex", alignItems: "center", gap: 8, padding: "7px 12px",
-    background: "linear-gradient(90deg, color-mix(in srgb, var(--teal) 14%, transparent), transparent)",
-    border: "1px solid color-mix(in srgb, var(--teal) 30%, transparent)", borderRadius: 10,
+  cardTitle: {
+    fontSize: 13, fontWeight: 700, color: "var(--text-hi)", lineHeight: 1.35,
   },
-  cacheIcon: { color: "var(--teal)", fontSize: 13, textShadow: "0 0 10px var(--teal)" },
-  cacheLabel: { color: "var(--teal)", fontSize: 11.5, fontWeight: 800, letterSpacing: "0.03em" },
-  cacheText: { color: "var(--text-lo)", fontSize: 11 },
-  cacheSpeed: {
-    fontSize: 10.5, fontWeight: 800, color: "var(--teal)",
-    background: "color-mix(in srgb, var(--teal) 18%, transparent)",
-    border: "1px solid color-mix(in srgb, var(--teal) 40%, transparent)",
-    borderRadius: 99, padding: "2px 9px", fontFamily: "'JetBrains Mono', monospace",
+  cardDesc: {
+    fontSize: 12, color: "var(--text-mid)", lineHeight: 1.6,
   },
-  cacheCost: { marginLeft: "auto", color: "var(--teal)", fontSize: 11.5, fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" },
 
-  /* Optimizer banner */
-  optimizerBanner: {
-    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
-    padding: "7px 12px", borderRadius: 10, flexWrap: "wrap",
-    background: "linear-gradient(90deg, color-mix(in srgb, var(--violet) 14%, transparent), transparent)",
-    border: "1px solid color-mix(in srgb, var(--violet) 28%, transparent)",
+  tokenBar: { marginTop: 4 },
+  tokenBarTrack: {
+    height: 4, background: "var(--bg-4)", borderRadius: 99, overflow: "hidden", marginBottom: 5,
   },
-  optimizerLeft: { display: "flex", alignItems: "center", gap: 6 },
-  optimizerIcon: { color: "var(--violet)", fontSize: 12 },
-  optimizerLabel: { color: "var(--violet)", fontSize: 11.5, fontWeight: 800, letterSpacing: "0.03em" },
-  optimizerStats: { display: "flex", alignItems: "center", gap: 8 },
-  statBlock: { display: "flex", alignItems: "baseline", gap: 4 },
-  statValue: { fontSize: 13, fontWeight: 800, color: "var(--text-hi)", fontFamily: "'JetBrains Mono', monospace" },
-  statUnit: { fontSize: 9.5, color: "var(--text-lo)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 },
-  arrow: { color: "var(--violet)", fontSize: 13, fontWeight: 700 },
-  savingsPill: {
-    fontSize: 10.5, fontWeight: 800, color: "var(--violet)",
-    background: "color-mix(in srgb, var(--violet) 18%, transparent)",
-    border: "1px solid color-mix(in srgb, var(--violet) 35%, transparent)",
-    borderRadius: 99, padding: "3px 9px", fontFamily: "'JetBrains Mono', monospace", whiteSpace: "nowrap",
+  tokenBarFill: { height: "100%", borderRadius: 99, transition: "width 0.6s var(--ease)" },
+  tokenBarLabels: {
+    display: "flex", justifyContent: "space-between",
   },
 };

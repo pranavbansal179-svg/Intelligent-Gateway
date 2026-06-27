@@ -373,8 +373,13 @@ export default function ChatWindow() {
                   </p>
                   <div style={styles.heroDivider} />
                   <div style={styles.heroFeatures}>
-                    {["⚡ Semantic cache", "✦ Prompt optimizer", "🛡 Injection guard", "📈 Live stock data"].map((f) => (
-                      <span key={f} style={styles.heroFeatureTag}>{f}</span>
+                    {[
+                      { label: "⚡ Semantic cache", desc: "Repeated questions answered instantly — no LLM call needed" },
+                      { label: "✦ Prompt optimizer", desc: "Verbose prompts compressed before sending to reduce cost" },
+                      { label: "🛡 Injection guard", desc: "Prompt injection attacks detected and blocked automatically" },
+                      { label: "📈 Live stock data", desc: "Real-time price context injected for ticker questions" },
+                    ].map((f) => (
+                      <span key={f.label} style={styles.heroFeatureTag} title={f.desc}>{f.label}</span>
                     ))}
                   </div>
                 </div>
@@ -403,26 +408,28 @@ export default function ChatWindow() {
                 </div>
               </div>
             )}
-            {activeChat.messages.map((msg) => (
-              <MessageBubble
-                key={msg.id}
-                role={msg.role}
-                content={msg.content}
-                metadata={msg.metadata}
-                blocked={msg.blocked}
-              />
-            ))}
-            {loading && (
-              <div style={styles.typingWrap}>
-                <div style={styles.typingAvatar}>O</div>
-                <div style={styles.typingIndicator}>
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
+            <div style={styles.messageInner}>
+              {activeChat.messages.map((msg) => (
+                <MessageBubble
+                  key={msg.id}
+                  role={msg.role}
+                  content={msg.content}
+                  metadata={msg.metadata}
+                  blocked={msg.blocked}
+                />
+              ))}
+              {loading && (
+                <div style={styles.typingWrap}>
+                  <div style={styles.typingAvatar}>O</div>
+                  <div style={styles.typingIndicator}>
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={bottomRef} />
+              )}
+              <div ref={bottomRef} />
+            </div>
           </div>
 
           {/* ── Input bar ── */}
@@ -613,7 +620,8 @@ const styles = {
 
   /* Chat area */
   chatArea: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" },
-  messageList: { flex: 1, overflowY: "auto", padding: "0 10% 16px" },
+  messageList: { flex: 1, overflowY: "auto", padding: 0 },
+  messageInner: { padding: "24px 10% 16px" },
 
   /* Empty state — Arcade-style hero */
   emptyState: {
@@ -651,12 +659,12 @@ const styles = {
   },
 
   /* Tier cards section */
-  tierSection: { padding: "36px 10% 28px", display: "flex", flexDirection: "column", alignItems: "center" },
+  tierSection: { padding: "32px 5% 28px", display: "flex", flexDirection: "column", alignItems: "center" },
   tierSectionLabel: {
     fontSize: 11, fontWeight: 700, color: "var(--text-lo)", textTransform: "uppercase",
     letterSpacing: "0.1em", marginBottom: 18,
   },
-  tierLegend: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, width: "100%", maxWidth: 560 },
+  tierLegend: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 10, width: "100%" },
   tierCard: {
     display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 5,
     padding: "16px 18px", background: "var(--bg-1)",
@@ -687,7 +695,7 @@ const styles = {
   },
 
   /* Input */
-  inputZone: { padding: "10px 10% 16px" },
+  inputZone: { padding: "10px 8% 16px" },
   inputBar: {
     display: "flex", alignItems: "center", gap: 8, padding: "8px 8px 8px 20px", borderRadius: 99,
     background: "var(--bg-1)", border: "1px solid var(--border)",
