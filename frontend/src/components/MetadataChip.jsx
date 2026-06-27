@@ -11,9 +11,25 @@ const TIER_COLORS = {
 };
 
 /**
- * @param {{ model: string, reason: string, cost: number }} props
+ * @param {{ model: string, reason: string, cost: number, cacheHit?: boolean }} props
  */
-export default function MetadataChip({ model, reason, cost }) {
+export default function MetadataChip({ model, reason, cost, cacheHit }) {
+  if (cacheHit) {
+    return (
+      <div style={styles.row}>
+        <span style={{ ...styles.tierBadge, color: "#00C896", background: "#00C89622", borderColor: "#00C89644" }}>
+          ⚡ CACHED
+        </span>
+        <span style={styles.dot}>·</span>
+        <span style={styles.text}>semantic match · served instantly</span>
+        <span style={styles.dot}>·</span>
+        <span style={{ ...styles.text, fontVariantNumeric: "tabular-nums", color: "#00C896" }}>
+          $0.0000
+        </span>
+      </div>
+    );
+  }
+
   const label = MODEL_LABELS[model] ?? model.replace(/^mzai:/, "").split("/").pop();
   const tier = reason.match(/Tier (\d)/i)?.[1];
   const tierColor = TIER_COLORS[tier] ?? "#00C896";

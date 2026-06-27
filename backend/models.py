@@ -18,6 +18,7 @@ class ChatResponse(BaseModel):
     budget_remaining: float
     budget_state: str
     injection_blocked: bool = False
+    cache_hit: bool = False
 
 
 class ClassifyResponse(BaseModel):

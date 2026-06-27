@@ -19,6 +19,7 @@ from .models import (
     ErrorResponse,
 )
 from .otari_client import OtariClient
+from .semantic_cache import SemanticCache
 from .stock import fetch_price_context
 
 # ---------------------------------------------------------------------------
@@ -47,6 +48,7 @@ client = OtariClient()
 classifier = PromptClassifier()
 budget_manager = BudgetManager()
 guardrail = GuardrailFilter()
+semantic_cache = SemanticCache()
 
 # ---------------------------------------------------------------------------
 # Local cost tracking — accumulated per session from token counts in responses.
@@ -220,7 +222,30 @@ async def chat(request: ChatRequest):
         )
 
     # ------------------------------------------------------------------
-    # 2. Classify prompt
+    # 2. Semantic cache lookup — free, instant, $0 cost
+    # ------------------------------------------------------------------
+    cached = semantic_cache.lookup(message)
+    if cached:
+        spent = _get_spent(session_id)
+        logger.info(
+            "CACHE HIT | session=%s | similarity match for: %.60s", session_id, message
+        )
+        return ChatResponse(
+            answer=cached["answer"],
+            model=cached["model"],
+            routing_reason=cached["routing_reason"],
+            call_cost=0.0,
+            naive_cost=0.0,
+            saved=0.0,
+            session_saved=max(0.0, _session_naive_spend.get(session_id, 0.0) - _get_spent(session_id)),
+            budget_remaining=budget_manager.get_remaining(spent),
+            budget_state=budget_manager.get_state(spent).value,
+            injection_blocked=False,
+            cache_hit=True,
+        )
+
+    # ------------------------------------------------------------------
+    # 3. Classify prompt
     # ------------------------------------------------------------------
     classification = classifier.classify(message)
     requested_tier = classification["tier"]
@@ -234,6 +259,7 @@ async def chat(request: ChatRequest):
     # ------------------------------------------------------------------
     # 4. Budget check — pre-call spend
     # ------------------------------------------------------------------
+
     pre_spend = _get_spent(session_id)
     state = budget_manager.get_state(pre_spend)
 
@@ -289,9 +315,17 @@ async def chat(request: ChatRequest):
     history.append({"role": "assistant", "content": answer})
 
     # ------------------------------------------------------------------
-    # 6. Record cost from token counts, update running session total
+    # 6. Record cost and populate semantic cache for future lookups
     # ------------------------------------------------------------------
     call_cost, naive_cost = _record_call_cost(session_id, model, raw_response)
+    semantic_cache.store(
+        query=message,
+        answer=answer,
+        model=model,
+        routing_reason=routing_reason,
+        call_cost=call_cost,
+        naive_cost=naive_cost,
+    )
     post_spend = _get_spent(session_id)
     remaining = budget_manager.get_remaining(post_spend)
     final_state = budget_manager.get_state(post_spend)
@@ -347,3 +381,11 @@ if os.getenv("ENVIRONMENT", "dev").lower() != "production":
     async def dev_clear_history(session_id: str):
         _session_history.pop(session_id, None)
         return {"cleared": session_id}
+
+    @app.get("/dev/cache")
+    async def dev_cache_stats():
+        entries = [
+            {"query": e["query"], "model": e["model"], "ts": e["ts"]}
+            for e in semantic_cache._entries
+        ]
+        return {"size": semantic_cache.size, "threshold": semantic_cache._threshold, "entries": entries}

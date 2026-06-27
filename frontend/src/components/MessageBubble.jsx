@@ -34,6 +34,7 @@ export default function MessageBubble({ role, content, metadata, blocked }) {
             model={metadata.model}
             reason={metadata.reason}
             cost={metadata.cost}
+            cacheHit={metadata.cacheHit}
           />
         )}
       </div>
