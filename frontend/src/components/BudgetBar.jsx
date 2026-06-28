@@ -28,7 +28,7 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
   return (
     <div style={styles.wrapper}>
       <div style={styles.row}>
-        <span style={styles.label}>Session budget</span>
+        <span style={styles.label}>SESSION BUDGET</span>
 
         {meta.label && (
           <span style={{ ...styles.badge, color, background: `color-mix(in srgb, ${color} 16%, transparent)`, borderColor: `color-mix(in srgb, ${color} 35%, transparent)` }}>
@@ -43,10 +43,10 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
         )}
 
         <span style={styles.amounts}>
-          <span style={{ color, fontWeight: 800 }}>${spent.toFixed(6)}</span>
+          <span style={{ color, fontWeight: 800, fontSize: 13 }}>${spent.toFixed(6)}</span>
           <span style={styles.muted}> spent</span>
           <span style={styles.sep}>·</span>
-          <span style={styles.muted}>${remaining.toFixed(6)} left</span>
+          <span style={{ ...styles.muted, fontWeight: 700, color: "var(--text-mid)" }}>${remaining.toFixed(6)} left</span>
           <span style={styles.sep}>/</span>
           <span style={styles.cap}>${cap.toFixed(2)}</span>
         </span>
@@ -57,9 +57,9 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
           style={{
             ...styles.fill,
             width: `${pct}%`,
-            minWidth: pct > 0 ? 4 : 0,
-            background: `linear-gradient(90deg, color-mix(in srgb, ${color} 60%, transparent), ${color})`,
-            boxShadow: `0 0 12px color-mix(in srgb, ${color} 50%, transparent)`,
+            minWidth: pct > 0 ? 6 : 0,
+            background: `linear-gradient(90deg, color-mix(in srgb, ${color} 70%, transparent), ${color})`,
+            boxShadow: `0 0 14px color-mix(in srgb, ${color} 55%, transparent)`,
           }}
         />
       </div>
@@ -79,13 +79,14 @@ export default function BudgetBar({ spent = 0, cap = 2.0, state = "FULL", lastCa
 
 const styles = {
   wrapper: {
-    padding: "9px 24px 11px", background: "var(--glass)", backdropFilter: "blur(16px)",
-    WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid var(--glass-border)", zIndex: 9,
+    padding: "10px 24px 13px",
+    background: "linear-gradient(90deg, color-mix(in srgb, var(--amber) 10%, var(--bg-3)) 0%, var(--bg-3) 55%, color-mix(in srgb, var(--gold) 8%, var(--bg-3)) 100%)",
+    borderBottom: "2px solid var(--border)", borderTop: "1px solid var(--border-soft)", zIndex: 9,
   },
-  row: { display: "flex", alignItems: "center", gap: 9, marginBottom: 7, flexWrap: "wrap" },
+  row: { display: "flex", alignItems: "center", gap: 9, marginBottom: 9, flexWrap: "wrap" },
   label: {
-    fontSize: 11, color: "var(--text-lo)", fontWeight: 700,
-    letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0,
+    fontSize: 11, color: "var(--text-mid)", fontWeight: 800,
+    letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0,
   },
   badge: {
     fontSize: 10.5, fontWeight: 800, padding: "2px 10px", borderRadius: 99,
@@ -98,16 +99,16 @@ const styles = {
     borderRadius: 99, padding: "2px 10px", fontFamily: "'JetBrains Mono', monospace",
   },
   amounts: {
-    fontSize: 12, fontWeight: 600, marginLeft: "auto",
+    fontSize: 12.5, fontWeight: 600, marginLeft: "auto",
     fontFamily: "'JetBrains Mono', monospace", whiteSpace: "nowrap",
     display: "flex", alignItems: "center", gap: 4,
   },
   muted: { color: "var(--text-lo)", fontWeight: 500 },
   sep: { color: "var(--text-dim)" },
-  cap: { color: "var(--text-mid)", fontWeight: 700 },
+  cap: { color: "var(--text-hi)", fontWeight: 800 },
   track: {
-    height: 7, background: "var(--bg-3)", borderRadius: 99, overflow: "hidden",
-    border: "1px solid var(--border-soft)",
+    height: 10, background: "var(--bg-4)", borderRadius: 99, overflow: "hidden",
+    border: "1px solid var(--border)",
   },
   fill: { height: "100%", borderRadius: 99, transition: "width 0.6s var(--ease)" },
 };
