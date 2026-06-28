@@ -999,6 +999,7 @@ const styles = {
   heroFeatureTag: {
     fontSize: 12, padding: "5px 14px", borderRadius: 99,
     fontFamily: "inherit", outline: "none",
+    cursor: "pointer", userSelect: "none",
   },
 
   /* Feature explainer panel */
