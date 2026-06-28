@@ -56,6 +56,7 @@ export default function SavingsPanel({ actualTotal = 0, naiveTotal = 0, queryCou
       ) : (
         <p style={styles.empty}>Send a message to see savings</p>
       )}
+
     </div>
   );
 }

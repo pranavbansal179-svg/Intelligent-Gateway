@@ -55,33 +55,111 @@ _PRICE_RE = re.compile("|".join(_PRICE_PATTERNS), re.IGNORECASE)
 # Ticker: 1–5 uppercase letters, optionally with .NS / .BSE suffix
 _TICKER_RE = re.compile(r"\b([A-Z]{1,5}(?:\.(?:NS|BSE|BO))?)\b")
 
+# Portfolio query patterns
+_PORTFOLIO_PATTERNS = [
+    r"\bi own\b",
+    r"\bi hold\b",
+    r"\bmy portfolio\b",
+    r"\bmy holdings?\b",
+    r"\bmy stocks?\b",
+    r"\banalyze my\b",
+    r"\breview my (?:portfolio|holdings?|stocks?|positions?)\b",
+    r"\bportfolio (?:of|with|has|contains|includes|review|analysis)\b",
+    r"\bmy positions?\b",
+]
+_PORTFOLIO_RE = re.compile("|".join(_PORTFOLIO_PATTERNS), re.IGNORECASE)
+
+# Common English words that look like tickers — excluded from symbol extraction
+_TICKER_EXCLUDE = {
+    "I", "A", "AN", "AM", "AT", "BE", "BY", "DO", "GO", "IF", "IN",
+    "IS", "IT", "ME", "MY", "NO", "OF", "ON", "OR", "SO", "TO", "UP",
+    "US", "WE", "AND", "ARE", "BUT", "FOR", "NOT", "THE", "YOU", "CAN",
+    "GET", "HAS", "HIM", "HIS", "HOW", "ITS", "MAY", "OUR", "OUT",
+    "WHO", "WHY", "WILL", "WITH", "WHAT", "WHEN", "THEN", "FROM",
+    "ROTH", "IRA", "APR", "ROI", "ETF", "SIP", "EMI",
+}
+
 
 def is_stock_price_query(message: str) -> bool:
     return bool(_PRICE_RE.search(message))
 
 
+def is_portfolio_query(message: str) -> bool:
+    return bool(_PORTFOLIO_RE.search(message))
+
+
 def _extract_ticker(message: str) -> Optional[str]:
-    # 1. Check company name mappings first
     lower = message.lower()
     for name, ticker in _NAME_TO_TICKER.items():
         if name in lower:
             return ticker
 
-    # 2. Find explicit uppercase ticker symbols
-    # Exclude common English words that look like tickers
-    _EXCLUDE = {"I", "A", "AN", "AM", "AT", "BE", "BY", "DO", "GO", "IF", "IN",
-                "IS", "IT", "ME", "MY", "NO", "OF", "ON", "OR", "SO", "TO", "UP",
-                "US", "WE", "AND", "ARE", "BUT", "FOR", "NOT", "THE", "YOU", "CAN",
-                "GET", "HAS", "HIM", "HIS", "HOW", "ITS", "MAY", "OUR", "OUT",
-                "WHO", "WHY", "WILL", "WITH", "WHAT", "WHEN", "THEN", "FROM",
-                "ROTH", "IRA", "APR", "ROI", "ETF", "SIP", "EMI"}
-
     matches = _TICKER_RE.findall(message)
     for m in matches:
-        if m not in _EXCLUDE:
+        if m not in _TICKER_EXCLUDE:
             return m
 
     return None
+
+
+def extract_all_tickers(message: str) -> list[str]:
+    """Return all unique tickers detected in a message (company names + symbols)."""
+    tickers: list[str] = []
+    seen: set[str] = set()
+    lower = message.lower()
+
+    for name, ticker in _NAME_TO_TICKER.items():
+        if name in lower and ticker not in seen:
+            tickers.append(ticker)
+            seen.add(ticker)
+
+    for m in _TICKER_RE.findall(message):
+        if m not in _TICKER_EXCLUDE and m not in seen:
+            tickers.append(m)
+            seen.add(m)
+
+    return tickers
+
+
+def fetch_portfolio_context(message: str) -> Optional[str]:
+    """
+    Fetch live prices for all tickers mentioned in a portfolio query.
+    Returns a multi-line context block or None if no tickers found.
+    """
+    tickers = extract_all_tickers(message)
+    if not tickers:
+        return None
+
+    lines = ["[Live Portfolio Data — fetched right now]"]
+    fetched = 0
+    for sym in tickers[:8]:  # cap at 8 to avoid slow requests
+        try:
+            t = yf.Ticker(sym)
+            info = t.fast_info
+            price = getattr(info, "last_price", None)
+            if price is None:
+                continue
+            prev = getattr(info, "previous_close", None)
+            currency = getattr(info, "currency", "USD")
+            year_high = getattr(info, "year_high", None)
+            year_low = getattr(info, "year_low", None)
+
+            line = f"  {sym}: {price:.2f} {currency}"
+            if prev:
+                chg_pct = (price - prev) / prev * 100
+                sign = "+" if chg_pct >= 0 else ""
+                line += f" ({sign}{chg_pct:.2f}% today)"
+            if year_low and year_high:
+                line += f" | 52w: {year_low:.2f}–{year_high:.2f}"
+            lines.append(line)
+            fetched += 1
+            logger.info("PORTFOLIO | ticker=%s | price=%.2f %s", sym, price, currency)
+        except Exception as e:
+            logger.warning("PORTFOLIO fetch failed | ticker=%s | error=%s", sym, e)
+
+    if fetched == 0:
+        return None
+    return "\n".join(lines)
 
 
 def fetch_price_context(message: str) -> Optional[str]:

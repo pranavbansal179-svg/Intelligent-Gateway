@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
 
 
 class ChatRequest(BaseModel):
@@ -24,6 +25,8 @@ class ChatResponse(BaseModel):
     optimized_tokens: int = 0
     latency_ms: int = 0
     pipeline_trace: list[dict] = []
+    portfolio_analyzed: bool = False
+    news_injected: bool = False
 
 
 class ClassifyResponse(BaseModel):

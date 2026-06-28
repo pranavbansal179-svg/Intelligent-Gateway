@@ -299,6 +299,8 @@ export default function ChatWindow() {
                   optimizedTokens: data.optimized_tokens ?? 0,
                   latencyMs: data.latency_ms ?? 0,
                   pipelineTrace: data.pipeline_trace ?? [],
+                  portfolioAnalyzed: data.portfolio_analyzed ?? false,
+                  newsInjected: data.news_injected ?? false,
                 },
               } : m
             ),

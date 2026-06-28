@@ -121,6 +121,8 @@ export default function MessageBubble({ role, content, metadata, blocked, isStre
             optimizedTokens={metadata.optimizedTokens}
             latencyMs={metadata.latencyMs}
             pipelineTrace={metadata.pipelineTrace ?? []}
+            portfolioAnalyzed={metadata.portfolioAnalyzed ?? false}
+            newsInjected={metadata.newsInjected ?? false}
           />
         )}
       </div>

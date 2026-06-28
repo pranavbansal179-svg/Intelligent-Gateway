@@ -96,6 +96,7 @@ function PipelineTrace({ steps, totalMs }) {
 export default function MetadataChip({
   model, reason, cost, cacheHit, wasOptimized,
   originalTokens, optimizedTokens, latencyMs, pipelineTrace = [],
+  portfolioAnalyzed, newsInjected,
 }) {
   /* ── CACHE HIT ── */
   if (cacheHit) {
@@ -155,6 +156,36 @@ export default function MetadataChip({
         </p>
         <p style={styles.cardDesc}>{tm.why}</p>
       </div>
+
+      {/* ── PORTFOLIO CARD ── */}
+      {portfolioAnalyzed && (
+        <div style={{ ...styles.card, borderColor: "color-mix(in srgb, var(--blue) 28%, transparent)" }}>
+          <div style={styles.cardHeader}>
+            <span style={{ ...styles.iconPill, background: "color-mix(in srgb, var(--blue) 10%, transparent)", color: "var(--blue)", border: "1px solid color-mix(in srgb, var(--blue) 25%, transparent)" }}>
+              📊 Portfolio Analyzer
+            </span>
+          </div>
+          <p style={styles.cardTitle}>Live prices fetched for your portfolio</p>
+          <p style={styles.cardDesc}>
+            All tickers detected in your message had their live prices pulled in real-time and injected into the prompt, then routed to Tier 3 for a structured portfolio review.
+          </p>
+        </div>
+      )}
+
+      {/* ── NEWS CARD ── */}
+      {newsInjected && (
+        <div style={{ ...styles.card, borderColor: "color-mix(in srgb, var(--amber) 28%, transparent)" }}>
+          <div style={styles.cardHeader}>
+            <span style={{ ...styles.iconPill, background: "color-mix(in srgb, var(--amber) 10%, transparent)", color: "var(--amber)", border: "1px solid color-mix(in srgb, var(--amber) 25%, transparent)" }}>
+              📰 News Injected
+            </span>
+          </div>
+          <p style={styles.cardTitle}>Recent headlines added to context</p>
+          <p style={styles.cardDesc}>
+            Fresh news headlines from Yahoo Finance were fetched and prepended so the model's advice is grounded in current events, not just training data.
+          </p>
+        </div>
+      )}
 
       {/* ── OPTIMIZER CARD ── */}
       {wasOptimized && savedPct > 0 && (

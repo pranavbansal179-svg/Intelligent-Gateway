@@ -23,9 +23,10 @@ from .models import (
     ErrorResponse,
 )
 from .otari_client import OtariClient
+from .news import fetch_news_context
 from .prompt_optimizer import optimize_prompt
 from .semantic_cache import SemanticCache
-from .stock import fetch_price_context
+from .stock import extract_all_tickers, fetch_portfolio_context, fetch_price_context, is_portfolio_query
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -361,20 +362,64 @@ async def chat(request: ChatRequest):
                        "detail": f"Prompt is {opt.get('original_tokens', 0)} tokens — short enough to send as-is", "ms": o_ms})
 
     # ------------------------------------------------------------------
-    # 6. Stock context injection
+    # 6. Stock / Portfolio context injection
     # ------------------------------------------------------------------
     t = time.perf_counter()
-    stock_context = fetch_price_context(effective_message)
-    s_ms = _step_ms(t)
+    portfolio_analyzed = False
+    context_parts: list[str] = []
 
-    if stock_context:
-        ticker_hint = stock_context.split("\n")[0][:60] if stock_context else ""
-        trace.append({"step": "context", "label": "Stock Context", "decision": "injected",
-                       "detail": f"Live market data injected: {ticker_hint}", "ms": s_ms})
-        user_content = f"{stock_context}\n\nUser question: {effective_message}"
+    if is_portfolio_query(effective_message):
+        portfolio_context = fetch_portfolio_context(effective_message)
+        s_ms = _step_ms(t)
+        if portfolio_context:
+            portfolio_analyzed = True
+            context_parts.append(portfolio_context)
+            tickers_found = extract_all_tickers(effective_message)
+            # Force Tier 3 for portfolio reviews
+            if actual_tier < 3:
+                from .classifier import MODEL_TIER3
+                actual_tier = 3
+                model = MODEL_TIER3
+                routing_reason += " | upgraded to T3 for portfolio analysis"
+            trace.append({"step": "context", "label": "Portfolio Analyzer", "decision": "injected",
+                           "detail": f"Live prices fetched for {len(tickers_found)} ticker(s): {', '.join(tickers_found[:5])}", "ms": s_ms})
+        else:
+            trace.append({"step": "context", "label": "Portfolio Analyzer", "decision": "skipped",
+                           "detail": "Portfolio query detected but no valid tickers found", "ms": s_ms})
     else:
-        trace.append({"step": "context", "label": "Stock Context", "decision": "skipped",
-                       "detail": "No stock ticker detected in prompt", "ms": s_ms})
+        stock_context = fetch_price_context(effective_message)
+        s_ms = _step_ms(t)
+        if stock_context:
+            context_parts.append(stock_context)
+            ticker_hint = stock_context.split("\n")[0][:60]
+            trace.append({"step": "context", "label": "Stock Context", "decision": "injected",
+                           "detail": f"Live market data injected: {ticker_hint}", "ms": s_ms})
+        else:
+            trace.append({"step": "context", "label": "Stock Context", "decision": "skipped",
+                           "detail": "No stock ticker detected in prompt", "ms": s_ms})
+
+    # ------------------------------------------------------------------
+    # 6b. News injection (Tier 3 only)
+    # ------------------------------------------------------------------
+    news_injected = False
+    if actual_tier == 3:
+        t = time.perf_counter()
+        tickers_for_news = extract_all_tickers(effective_message)
+        if tickers_for_news:
+            news_context = await fetch_news_context(tickers_for_news)
+            n_ms = _step_ms(t)
+            if news_context:
+                news_injected = True
+                context_parts.append(news_context)
+                trace.append({"step": "news", "label": "News Injector", "decision": "injected",
+                               "detail": f"Recent headlines fetched for {', '.join(tickers_for_news[:3])}", "ms": n_ms})
+            else:
+                trace.append({"step": "news", "label": "News Injector", "decision": "skipped",
+                               "detail": "No headlines found for detected tickers", "ms": n_ms})
+
+    if context_parts:
+        user_content = "\n\n".join(context_parts) + f"\n\nUser question: {effective_message}"
+    else:
         user_content = effective_message
 
     # ------------------------------------------------------------------
@@ -441,6 +486,8 @@ async def chat(request: ChatRequest):
         optimized_tokens=opt["optimized_tokens"],
         latency_ms=latency,
         pipeline_trace=trace,
+        portfolio_analyzed=portfolio_analyzed,
+        news_injected=news_injected,
     )
 
 
@@ -513,3 +560,4 @@ if os.getenv("ENVIRONMENT", "dev").lower() != "production":
             for e in semantic_cache._entries
         ]
         return {"size": semantic_cache.size, "threshold": semantic_cache._threshold, "entries": entries}
+
