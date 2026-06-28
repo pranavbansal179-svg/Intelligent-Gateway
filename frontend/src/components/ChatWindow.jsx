@@ -868,8 +868,8 @@ const styles = {
   /* Sidebar */
   sidebar: {
     width: 268, flexShrink: 0, padding: "16px 12px",
-    background: "linear-gradient(180deg, var(--bg-1) 0%, #F1F5FF 100%)",
-    borderRight: "1px solid var(--border)", overflowY: "auto",
+    background: "var(--bg-4)",
+    borderRight: "1px solid var(--bg-4)", overflowY: "auto",
     display: "flex", flexDirection: "column", gap: 4,
   },
   newChatBtn: {
@@ -891,10 +891,10 @@ const styles = {
   },
   sectionDividerLine: {
     flex: 1, height: 1,
-    background: "linear-gradient(90deg, var(--border), transparent)",
+    background: "linear-gradient(90deg, var(--bg-2), transparent)",
   },
   sectionDividerLabel: {
-    fontSize: 9.5, fontWeight: 700, color: "var(--text-dim)",
+    fontSize: 9.5, fontWeight: 700, color: "var(--text-lo)",
     letterSpacing: "0.1em", textTransform: "uppercase", whiteSpace: "nowrap",
   },
   chatList: { display: "flex", flexDirection: "column", gap: 3, marginBottom: 10 },
@@ -903,7 +903,7 @@ const styles = {
     padding: "9px 12px", borderRadius: 10, cursor: "pointer",
     transition: "background 0.15s var(--ease)", overflow: "hidden",
   },
-  chatItemActive: { background: "var(--bg-3)" },
+  chatItemActive: { background: "var(--bg-2)" },
   chatActiveBar: {
     position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
     width: 3, height: "60%", borderRadius: 99, background: "var(--grad-primary)",
@@ -923,17 +923,17 @@ const styles = {
 
   /* Panels */
   panel: {
-    background: "var(--bg-0)", border: "1px solid var(--border)",
+    background: "var(--bg-1)", border: "1px solid var(--border)",
     borderRadius: 12, overflow: "hidden", marginTop: 6,
-    boxShadow: "0 1px 3px rgba(18,28,64,0.05)",
+    boxShadow: "0 1px 4px rgba(18,28,64,0.08)",
   },
   panelHeader: {
     width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
-    padding: "11px 14px", background: "var(--bg-3)", border: "none", color: "var(--text-mid)",
+    padding: "11px 14px", background: "var(--bg-3)", border: "none", color: "var(--text-hi)",
     fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "left",
-    borderBottom: "1px solid var(--border-soft)",
+    borderBottom: "1px solid var(--border)",
   },
-  chevron: { fontSize: 14, transition: "transform 0.25s var(--ease)", color: "var(--text-lo)" },
+  chevron: { fontSize: 14, transition: "transform 0.25s var(--ease)", color: "var(--text-mid)" },
   panelBody: { padding: "10px 10px 12px", background: "var(--bg-1)" },
   demoBtn: {
     display: "flex", alignItems: "center", gap: 8, width: "100%",
@@ -1137,7 +1137,7 @@ const styles = {
     .hover-lift:hover { transform: translateY(-1px); border-color: var(--border); color: var(--text-hi); }
     .newchat-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45,91,255,0.38); filter: brightness(1.06); }
     .newchat-btn:active { transform: translateY(0); }
-    .chat-item:hover { background: var(--bg-3); }
+    .chat-item:hover { background: var(--bg-2); }
     .chat-item:hover .delete-chat-btn { opacity: 1; }
     .delete-chat-btn { opacity: 0; transition: opacity 0.15s, background 0.15s, color 0.15s; }
     .delete-chat-btn:hover { background: color-mix(in srgb, var(--rose) 14%, transparent); color: var(--rose); }
