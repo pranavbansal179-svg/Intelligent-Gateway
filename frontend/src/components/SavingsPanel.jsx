@@ -54,7 +54,10 @@ export default function SavingsPanel({ actualTotal = 0, naiveTotal = 0, queryCou
           </div>
         </>
       ) : (
-        <p style={styles.empty}>Send a message to see savings</p>
+        <p style={styles.empty}>
+          <span style={{ display: "block", fontSize: 18, marginBottom: 6, opacity: 0.35 }}>📊</span>
+          Send a message to start<br />tracking savings vs Tier 3
+        </p>
       )}
 
     </div>
@@ -63,16 +66,19 @@ export default function SavingsPanel({ actualTotal = 0, naiveTotal = 0, queryCou
 
 const styles = {
   wrapper: {
-    background: "var(--bg-1)", border: "1px solid var(--border-soft)",
-    borderRadius: 14, overflow: "hidden", marginTop: 2,
+    background: "var(--bg-0)", border: "1px solid var(--border)",
+    borderRadius: 12, overflow: "hidden", marginTop: 6,
+    borderLeft: "3px solid var(--teal)",
+    boxShadow: "0 1px 3px rgba(18,28,64,0.05)",
   },
   header: {
-    padding: "11px 14px 8px", borderBottom: "1px solid var(--border-soft)",
+    padding: "11px 14px 10px", borderBottom: "1px solid var(--border-soft)",
     display: "flex", justifyContent: "space-between", alignItems: "center",
+    background: "var(--bg-3)",
   },
   title: { fontSize: 12, fontWeight: 700, color: "var(--text-mid)" },
   subtitle: { fontSize: 10, color: "var(--text-dim)", fontWeight: 500 },
-  grid: { display: "flex", alignItems: "center", padding: "12px 12px 6px" },
+  grid: { display: "flex", alignItems: "center", padding: "12px 12px 6px", background: "var(--bg-1)" },
   cell: { flex: 1, display: "flex", flexDirection: "column", gap: 3, alignItems: "center", textAlign: "center" },
   cellLabel: { fontSize: 10, color: "var(--text-lo)", fontWeight: 600 },
   cellValue: { fontSize: 14, fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" },
@@ -100,5 +106,9 @@ const styles = {
     background: "var(--grad-primary)", WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent",
   },
   projectionSub: { fontSize: 10, color: "var(--text-lo)", marginTop: 3, position: "relative", fontFamily: "'JetBrains Mono', monospace" },
-  empty: { fontSize: 11, color: "var(--text-dim)", textAlign: "center", padding: "14px 0 16px", margin: 0 },
+  empty: {
+    fontSize: 11, color: "var(--text-dim)", textAlign: "center",
+    padding: "18px 16px 20px", margin: 0, background: "var(--bg-1)",
+    lineHeight: 1.6,
+  },
 };

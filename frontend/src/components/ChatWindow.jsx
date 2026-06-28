@@ -468,6 +468,11 @@ export default function ChatWindow() {
             })}
           </div>
 
+          <div style={styles.sectionDivider}>
+            <span style={styles.sectionDividerLabel}>Analytics & Tools</span>
+            <span style={styles.sectionDividerLine} />
+          </div>
+
           <SavingsPanel
             actualTotal={activeChat.actualTotal || 0}
             naiveTotal={activeChat.naiveTotal || 0}
@@ -475,7 +480,7 @@ export default function ChatWindow() {
           />
 
           {/* Scenario Builder */}
-          <div style={styles.panel}>
+          <div style={{ ...styles.panel, borderLeft: "3px solid var(--blue)" }}>
             <div style={{ ...styles.panelHeader, cursor: "default" }}>
               <span>🎯 Scenario Builder</span>
               <span style={styles.scenarioBeta}>AI prompt</span>
@@ -516,7 +521,7 @@ export default function ChatWindow() {
           </div>
 
           {IS_DEV && (
-            <div style={styles.panel}>
+            <div style={{ ...styles.panel, borderLeft: "3px solid var(--border)" }}>
               <div style={{ ...styles.panelHeader, cursor: "default" }}>
                 <span>🔧 Dev controls</span>
               </div>
@@ -531,7 +536,7 @@ export default function ChatWindow() {
           )}
 
           {logOpen && (
-            <div style={styles.panel}>
+            <div style={{ ...styles.panel, borderLeft: "3px solid var(--violet)" }}>
               <div style={{ ...styles.panelHeader, cursor: "default" }}>
                 <span>📋 Request log</span>
               </div>
@@ -863,8 +868,9 @@ const styles = {
   /* Sidebar */
   sidebar: {
     width: 268, flexShrink: 0, padding: "16px 12px",
-    background: "var(--bg-1)", borderRight: "1px solid var(--border)", overflowY: "auto",
-    display: "flex", flexDirection: "column", gap: 6,
+    background: "linear-gradient(180deg, var(--bg-1) 0%, #F1F5FF 100%)",
+    borderRight: "1px solid var(--border)", overflowY: "auto",
+    display: "flex", flexDirection: "column", gap: 4,
   },
   newChatBtn: {
     position: "relative", overflow: "hidden",
@@ -879,7 +885,19 @@ const styles = {
     fontSize: 10, fontWeight: 700, color: "var(--text-lo)",
     letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 8px 4px",
   },
-  chatList: { display: "flex", flexDirection: "column", gap: 3, marginBottom: 6 },
+  sectionDivider: {
+    display: "flex", alignItems: "center", gap: 8,
+    padding: "14px 4px 6px",
+  },
+  sectionDividerLine: {
+    flex: 1, height: 1,
+    background: "linear-gradient(90deg, var(--border), transparent)",
+  },
+  sectionDividerLabel: {
+    fontSize: 9.5, fontWeight: 700, color: "var(--text-dim)",
+    letterSpacing: "0.1em", textTransform: "uppercase", whiteSpace: "nowrap",
+  },
+  chatList: { display: "flex", flexDirection: "column", gap: 3, marginBottom: 10 },
   chatItem: {
     position: "relative", display: "flex", alignItems: "center", gap: 8,
     padding: "9px 12px", borderRadius: 10, cursor: "pointer",
@@ -905,16 +923,18 @@ const styles = {
 
   /* Panels */
   panel: {
-    background: "var(--bg-1)", border: "1px solid var(--border-soft)",
-    borderRadius: 12, overflow: "hidden", marginTop: 2,
+    background: "var(--bg-0)", border: "1px solid var(--border)",
+    borderRadius: 12, overflow: "hidden", marginTop: 6,
+    boxShadow: "0 1px 3px rgba(18,28,64,0.05)",
   },
   panelHeader: {
     width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
-    padding: "11px 14px", background: "none", border: "none", color: "var(--text-mid)",
+    padding: "11px 14px", background: "var(--bg-3)", border: "none", color: "var(--text-mid)",
     fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "left",
+    borderBottom: "1px solid var(--border-soft)",
   },
   chevron: { fontSize: 14, transition: "transform 0.25s var(--ease)", color: "var(--text-lo)" },
-  panelBody: { padding: "2px 10px 12px" },
+  panelBody: { padding: "10px 10px 12px", background: "var(--bg-1)" },
   demoBtn: {
     display: "flex", alignItems: "center", gap: 8, width: "100%",
     background: "var(--bg-2)", border: "1px solid var(--border)", borderRadius: 10,
@@ -1091,7 +1111,7 @@ const styles = {
     color: "var(--blue)", border: "1px solid color-mix(in srgb, var(--blue) 22%, transparent)",
     borderRadius: 99, padding: "2px 8px",
   },
-  scenarioBody: { padding: "4px 14px 14px", display: "flex", flexDirection: "column", gap: 6 },
+  scenarioBody: { padding: "10px 14px 14px", background: "var(--bg-1)", display: "flex", flexDirection: "column", gap: 6 },
   scenarioLabel: { fontSize: 10.5, fontWeight: 700, color: "var(--text-lo)", letterSpacing: "0.04em", textTransform: "uppercase", marginTop: 4 },
   scenarioSelect: {
     width: "100%", padding: "8px 10px", fontSize: 12.5, fontWeight: 500,
